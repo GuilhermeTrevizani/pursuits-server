@@ -332,7 +332,10 @@ namespace VidaPolicial
             if (x?.Codigo > 0)
             {
                 foreach (var u in Global.Usuarios)
+                {
+                    u.Player.Emit("blip:remove", x.ID);
                     Functions.EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"{x.Nome} {{{Global.CorErro}}}saiu{{#FFFFFF}} do servidor.");
+                }
 
                 Functions.SalvarUsuario(x);
                 Global.Usuarios.RemoveAll(y => y.ID == x.ID);
@@ -366,7 +369,7 @@ namespace VidaPolicial
             {
                 var u = Functions.ObterUsuario(player);
                 foreach (var x in Global.Usuarios.Where(x => x.Player.Dimension == player.Dimension))
-                    Functions.EnviarMensagem(x.Player, TipoMensagem.Nenhum, $"{{{u.Cor}}}{u.Nome}{{#FFFFFF}}: {mensagem}");
+                    Functions.EnviarMensagem(x.Player, TipoMensagem.Nenhum, $"{(!string.IsNullOrWhiteSpace(u.Cor) ? $"{{{u.Cor}}}" : string.Empty)}{u.Nome}{{#FFFFFF}}: {mensagem}");
                 return;
             }
 
