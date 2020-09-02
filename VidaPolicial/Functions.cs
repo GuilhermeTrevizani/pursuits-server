@@ -282,7 +282,7 @@ namespace VidaPolicial
                 },
                 new Situacao()
                 {
-                    VeiculoFugitivo = VehicleModel.Schafter2,
+                    VeiculoFugitivo = VehicleModel.Dominator3,
                     PosicaoFugitivo = new Situacao.Posicao()
                     {
                         Position =  new Position(227.65714f, 200.42638f, 104.901855f),
@@ -396,7 +396,7 @@ namespace VidaPolicial
                 },
                 new Situacao()
                 {
-                    VeiculoFugitivo = VehicleModel.Schafter2,
+                    VeiculoFugitivo = VehicleModel.Dominator3,
                     PosicaoFugitivo = new Situacao.Posicao()
                     {
                         Position =  new Position(-1217.8286f, -1129.1208f, 7.324585f),

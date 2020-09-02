@@ -188,7 +188,7 @@ namespace VidaPolicial
 
             Functions.EnviarMensagem(player, TipoMensagem.Titulo, $"{Global.NomeServidor} • Staff Online");
             foreach (var u in players)
-                Functions.EnviarMensagem(player, TipoMensagem.Nenhum, $"{{{u.Cor}}}{u.Staff}{{#FFFFFF}} {u.Nome} [{u.ID}]");
+                Functions.EnviarMensagem(player, TipoMensagem.Nenhum, $"{(!string.IsNullOrWhiteSpace(u.Cor) ? $"{{{u.Cor}}}" : string.Empty)}{u.Staff}{{#FFFFFF}} {u.Nome} [{u.ID}]");
         }
 
         [Command("pm", "/pm (ID ou nome) (mensagem)", GreedyArg = true)]
