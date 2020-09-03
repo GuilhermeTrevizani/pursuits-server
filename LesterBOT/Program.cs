@@ -29,6 +29,7 @@ namespace LesterBOT
                 Client.Ready += Client_Ready;
                 services.GetRequiredService<CommandService>().Log += LogAsync;
 
+                await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
                 await Client.LoginAsync(TokenType.Bot, "NzUwNjkxODQxNDUxNzUzNTEz.X0-OQg.ZDhhumvOiaE9gfPZoPy4JLL6oPo");
                 await Client.StartAsync();
 

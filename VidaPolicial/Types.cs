@@ -11,13 +11,13 @@
 
     public enum TipoStaff
     {
-        Nenhum = 0,
+        Jogador = 0,
 
-        Helper = 1,
+        Ajudante = 1,
 
-        Administrator = 2,
+        Administrador = 2,
 
-        Manager = 1337,
+        Diretor = 1337,
     }
 
     public enum TipoLog

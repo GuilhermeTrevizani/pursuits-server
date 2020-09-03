@@ -30,6 +30,7 @@ namespace VidaPolicial
             Alt.OnPlayerDisconnect += OnPlayerDisconnect;
             Alt.OnPlayerDead += OnPlayerDead;
             Alt.OnWeaponDamage += OnWeaponDamage;
+            Alt.OnPlayerDamage += OnPlayerDamage;
             Alt.OnClient<IPlayer, string>("OnPlayerChat", OnPlayerChat);
             Alt.OnClient<IPlayer, string, string>("EntrarUsuario", EntrarUsuario);
             Alt.OnClient<IPlayer, string, string, string, string>("RegistrarUsuario", RegistrarUsuario);
@@ -41,6 +42,7 @@ namespace VidaPolicial
             Alt.OnClient<IPlayer>("Atirou", Atirou);
             Alt.OnClient<IPlayer, string>("SelecionarVeiculo", SelecionarVeiculo);
             Alt.OnClient<IPlayer, string>("SelecionarSkin", SelecionarSkin);
+            Alt.OnClient<IPlayer, string, string>("AtualizarInformacoes", AtualizarInformacoes);
 
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = CultureInfo.DefaultThreadCurrentUICulture =
                   CultureInfo.GetCultureInfo("pt-BR");
@@ -59,14 +61,6 @@ namespace VidaPolicial
 
             Console.WriteLine($"{Global.NomeServidor} por Guilherme Trevizani (TR3V1Z4)");
 
-            TimerPrincipal = new Timer(60000);
-            TimerPrincipal.Elapsed += TimerPrincipal_Elapsed;
-            TimerPrincipal.Start();
-
-            TimerSegundo = new Timer(1000);
-            TimerSegundo.Elapsed += TimerSegundo_Elapsed;
-            TimerSegundo.Start();
-
             BWVerificarPerseguicoes = new BackgroundWorker()
             {
                 WorkerSupportsCancellation = true
@@ -79,6 +73,14 @@ namespace VidaPolicial
                 WorkerSupportsCancellation = true
             };
             BWIniciarPerseguicoes.DoWork += BWIniciarPerseguicoes_DoWork;
+
+            TimerPrincipal = new Timer(60000);
+            TimerPrincipal.Elapsed += TimerPrincipal_Elapsed;
+            TimerPrincipal.Start();
+
+            TimerSegundo = new Timer(1000);
+            TimerSegundo.Elapsed += TimerSegundo_Elapsed;
+            TimerSegundo.Start();
         }
 
         private async void BWIniciarPerseguicoes_DoWork(object sender, DoWorkEventArgs e)
@@ -95,10 +97,12 @@ namespace VidaPolicial
                 u.Player.SetSyncedMetaData("podeatirar", false);
                 u.Player.Emit("setPlayerCanDoDriveBy", false);
                 u.Player.Emit("toggleGameControls", false);
-                Functions.EnviarMensagem(u.Player, TipoMensagem.Sucesso, "As perseguições iniciarão em 5 segundos!");
+                u.Player.SetSyncedMetaData("congelar", true);
+                u.Player.SetSyncedMetaData("tempo", string.Empty);
+                Functions.EnviarMensagem(u.Player, TipoMensagem.Sucesso, "As perseguições serão montadas em 10 segundos.");
             }
 
-            await Task.Delay(5000);
+            await Task.Delay(10000);
 
             users = Global.Usuarios.Where(x => x.Player.Dimension == 0).OrderBy(x => Guid.NewGuid()).ToList();
 
@@ -111,6 +115,7 @@ namespace VidaPolicial
             foreach (var u in users)
             {
                 u.Player.Emit("toggleGameControls", false);
+                u.Player.SetSyncedMetaData("congelar", true);
 
                 var index = users.IndexOf(u);
                 if (index % 10 == 0 && index != 0)
@@ -161,14 +166,14 @@ namespace VidaPolicial
                     u.Player.GiveWeapon(WeaponModel.AssaultRifle, 2000, false);
                 }
                 u.Player.Health = u.Player.MaxHealth;
-                u.Player.Armor = 100;
+                u.Player.Armor = 0;
                 u.VeiculoPerseguicao = Alt.CreateVehicle(veh, pos.Position, pos.Rotation);
                 u.VeiculoPerseguicao.ManualEngineControl = true;
                 u.VeiculoPerseguicao.Dimension = perseguicao.ID;
                 u.VeiculoPerseguicao.NumberplateText = u.Policial ? "LSPD" : "CRIME";
                 u.VeiculoPerseguicao.LockState = VehicleLockState.Unlocked;
                 u.Player.Emit("setPedIntoVehicle", u.VeiculoPerseguicao, -1, true);
-                Functions.EnviarMensagem(u.Player, TipoMensagem.Sucesso, "A perseguição iniciará em 5 segundos!");
+                Functions.EnviarMensagem(u.Player, TipoMensagem.Sucesso, "A perseguição iniciará em 10 segundos.");
             }
 
             if (users.Count % 10 != 0)
@@ -199,8 +204,8 @@ namespace VidaPolicial
                 var p = Global.Perseguicoes[i];
 
                 var players = Global.Usuarios.Where(x => x.Player.Dimension == p.ID).ToList();
-                var segundosPerseguicao = (DateTime.Now - (p.Inicio ?? DateTime.Now)).TotalSeconds;
-                if (players.GroupBy(x => x.Policial).Count() == 1 || segundosPerseguicao >= 420)
+                var minutosPerseguicao = (DateTime.Now - (p.Inicio ?? DateTime.Now)).Minutes;
+                if (players.GroupBy(x => x.Policial).Count() <= 1 || minutosPerseguicao >= 7)
                 {
                     var veiculos = Alt.GetAllVehicles().Where(x => x.Dimension == p.ID);
                     foreach (var v in veiculos)
@@ -237,26 +242,39 @@ namespace VidaPolicial
                         if (x.Player.IsInVehicle && x.Player.Vehicle.EngineOn)
                         {
                             if (x.Player.Vehicle.BodyHealth < 650 || x.Player.Vehicle.EngineHealth < 650)
+                            {
                                 x.Player.Emit("vehicle:setVehicleEngineOn", x.Player.Vehicle, false);
+                                Functions.EnviarMensagem(x.Player, TipoMensagem.Erro, $"Seu veículo sofreu muito dano e o motor desabilitou.");
+                            }
                         }
 
+                        var areaName = string.Empty;
+                        var zoneName = string.Empty;
                         var tipoBlip = 225;
                         var corBlip = 38;
                         if (!x.Policial)
                         {
                             tipoBlip = 229;
                             corBlip = 75;
+                            x.GPS = minutosPerseguicao % 2 == 0 ? true : false;
 
-                            if (segundosPerseguicao <= 30
-                                || (segundosPerseguicao > 150 && segundosPerseguicao <= 180)
-                                || (segundosPerseguicao > 300 && segundosPerseguicao <= 330))
-                                x.GPS = true;
-                            else
-                                x.GPS = false;
+                            if (x.GPS)
+                            {
+                                var minutosUltimoAvisoPosicao = (DateTime.Now - (p.DataUltimoAvisoPosicao ?? DateTime.Now)).Minutes;
+                                if (minutosUltimoAvisoPosicao >= 1)
+                                {
+                                    areaName = x.AreaName;
+                                    zoneName = x.ZoneName;
+                                    p.DataUltimoAvisoPosicao = DateTime.Now;
+                                }
+                            }
                         }
 
                         foreach (var u in players)
                         {
+                            if (u.Policial && !string.IsNullOrWhiteSpace(areaName) && !string.IsNullOrWhiteSpace(zoneName))
+                                Functions.EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"[RÁDIO] Jake Peralta: O bandido foi visto em {areaName} - {zoneName}.", "#FFFF9B");
+
                             u.Player.Emit("blip:remove", x.ID);
 
                             if (!x.GPS)
@@ -271,10 +289,7 @@ namespace VidaPolicial
 
         private bool OnWeaponDamage(IPlayer player, IEntity target, uint weapon, ushort damage, Position shotOffset, BodyPart bodyPart)
         {
-            if (!(target is IPlayer playerTarget))
-                return true;
-
-            if (player.Dimension == 0)
+            if (!(target is IPlayer playerTarget) || player.Dimension == 0)
                 return true;
 
             var p = Functions.ObterUsuario(player);
@@ -288,6 +303,16 @@ namespace VidaPolicial
             return true;
         }
 
+        private void OnPlayerDamage(IPlayer player, IEntity attacker, uint weapon, ushort damage)
+        {
+            if (!(attacker is IPlayer playerAttacker) || player.Dimension == 0)
+                return;
+
+            var pAttacker = Functions.ObterUsuario(playerAttacker);
+            if (!pAttacker.Policial)
+                Atirou(playerAttacker);
+        }
+
         private void OnPlayerDead(IPlayer player, IEntity killer, uint weapon)
         {
             if (player.Dimension != 0)
@@ -295,7 +320,7 @@ namespace VidaPolicial
                 var p = Functions.ObterUsuario(player);
                 var players = Global.Usuarios.Where(x => x.Player.Dimension == player.Dimension);
 
-                if (killer is IPlayer playerKiller)
+                if (killer is IPlayer playerKiller && playerKiller != player)
                 {
                     var pKiller = Functions.ObterUsuario(playerKiller);
 
@@ -311,6 +336,9 @@ namespace VidaPolicial
                     else
                     {
                         pKiller.Level++;
+
+                        if (!pKiller.Policial && p.Policial)
+                            Atirou(playerKiller);
                     }
 
                     foreach (var u in players)
@@ -368,7 +396,7 @@ namespace VidaPolicial
             if (mensagem[0] != '/')
             {
                 var u = Functions.ObterUsuario(player);
-                foreach (var x in Global.Usuarios.Where(x => x.Player.Dimension == player.Dimension))
+                foreach (var x in Global.Usuarios)
                     Functions.EnviarMensagem(x.Player, TipoMensagem.Nenhum, $"{(!string.IsNullOrWhiteSpace(u.Cor) ? $"{{{u.Cor}}}" : string.Empty)}{u.Nome}{{#FFFFFF}}: {mensagem}");
                 return;
             }
@@ -610,9 +638,9 @@ namespace VidaPolicial
             if (p == null)
                 return;
 
-            var personagens = Global.Usuarios.OrderByDescending(x => x.Level).ThenBy(x => x.Nome)
-                .Select(x => new { x.Level, x.ID, x.Nome, x.Player.Ping }).ToList();
-            player.Emit("Server:ListarPlayers", JsonConvert.SerializeObject(personagens));
+            var personagens = Global.Usuarios.OrderBy(x => x.ID == p.ID ? 0 : 1).ThenBy(x => x.ID)
+                .Select(x => new { x.ID, x.Nome, x.Level, Tipo = x.Staff.ToString(), x.Player.Ping, x.Cor }).ToList();
+            player.Emit("Server:ListarPlayers", Global.NomeServidor, JsonConvert.SerializeObject(personagens), Global.Usuarios.Count(x => x.Staff != TipoStaff.Jogador));
         }
 
         private void TrancarDestrancarVeiculo(IPlayer player)
@@ -695,10 +723,11 @@ namespace VidaPolicial
             if (atirou)
                 return;
 
+            Functions.EnviarMensagem(player, TipoMensagem.Erro, $"Você atirou/atacou e os disparos estão liberados.");
             player.SetSyncedMetaData("atirou", true);
-            foreach (var u in Global.Usuarios.Where(x => x.Player.Dimension == player.Dimension))
+            foreach (var u in Global.Usuarios.Where(x => x.Player.Dimension == player.Dimension && x.Policial))
             {
-                Functions.EnviarMensagem(u.Player, TipoMensagem.Erro, $"O bandido {p.Nome} atirou/atacou e os disparos estão liberados!");
+                Functions.EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"[RÁDIO] Jake Peralta: O bandido {p.Nome} atirou/atacou e os disparos estão liberados.", "#FFFF9B");
                 u.Player.SetSyncedMetaData("podeatirar", true);
                 u.Player.Emit("setPlayerCanDoDriveBy", true);
             }
@@ -716,6 +745,13 @@ namespace VidaPolicial
             var p = Functions.ObterUsuario(player);
             p.Skin = (long)Enum.GetValues(typeof(PedModel)).Cast<PedModel>().FirstOrDefault(x => x.ToString().ToLower() == skin.ToLower());
             Functions.EnviarMensagem(player, TipoMensagem.Sucesso, $"Você selecionou a skin {skin} e será usada na próxima perseguição!");
+        }
+
+        private void AtualizarInformacoes(IPlayer player, string areaName, string zoneName)
+        {
+            var p = Functions.ObterUsuario(player);
+            p.AreaName = areaName;
+            p.ZoneName = zoneName;
         }
     }
 }

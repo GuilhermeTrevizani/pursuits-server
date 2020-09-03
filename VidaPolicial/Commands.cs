@@ -30,7 +30,7 @@ namespace VidaPolicial
                 <tr>
                     <td>Teclas</td>
                     <td>F2</td>
-                    <td>Exibe os players online</td>
+                    <td>Exibe os players online  (mantenha pressionada)</td>
                 </tr>
                 <tr>
                     <td>Teclas</td>
@@ -59,11 +59,6 @@ namespace VidaPolicial
                 </tr>
                 <tr>
                     <td>Player</td>
-                    <td>/staff</td>
-                    <td>Visualiza os membros de staff online</td>
-                </tr>
-                <tr>
-                    <td>Player</td>
                     <td>/skin</td>
                     <td>Seleciona sua skin quando policial</td>
                 </tr>
@@ -88,18 +83,14 @@ namespace VidaPolicial
                     <td>Desiste de uma perseguição sendo policial ou bandido</td>
                 </tr>";
 
-            if ((int)p.Staff >= (int)TipoStaff.Helper)
+            if ((int)p.Staff >= (int)TipoStaff.Ajudante)
                 html += $@"<tr>
                     <td>Helper</td>
                     <td>/kick</td>
                     <td>Expulsa o player</td>
-                </tr><tr>
-                    <td>Helper</td>
-                    <td>/g</td>
-                    <td>Fala no chat global</td>
                 </tr>";
 
-            if ((int)p.Staff >= (int)TipoStaff.Administrator)
+            if ((int)p.Staff >= (int)TipoStaff.Administrador)
                 html += $@"<tr>
                     <td>Administrator</td>
                     <td>/ban</td>
@@ -136,11 +127,11 @@ namespace VidaPolicial
                     <td>Remove um veículo</td>
                 </tr>";
 
-            if ((int)p.Staff >= (int)TipoStaff.Manager)
+            if ((int)p.Staff >= (int)TipoStaff.Diretor)
                 html += $@"<tr>
                     <td>Manager</td>
-                    <td>/setstaff</td>
-                    <td>Seta o nível de staff de um player</td>
+                    <td>/staff</td>
+                    <td>Modifica o nível de staff de um player</td>
                 </tr>";
 
             html += $@"
@@ -164,6 +155,8 @@ namespace VidaPolicial
             <p>O modo de jogo é planejado tentando ser o mais equilibrado possível, desde a criação dos mapas de perseguições, veículos, até mesmo na quantidade de policiais em uma perseguição.</p>
             <p>Uma perseguição é iniciada com no mínimo 2 jogadores, um fugindo e outro perseguindo. Uma perseguição só pode ter no máximo 10 jogadores, sendo 1 fugindo e outros 9 perseguindo. A cada 10 jogadores, uma nova perseguição é iniciada em uma outra dimensão, ocorrendo-as estas simultâneamente. Novas perseguições só são iniciadas se todas as perseguições ativas já tiverem sido encerradas.</p>
             <p>O bandido tem um tempo de 7 minutos para conseguir escapar ou matar todos os policiais em sua seção. O policial, antes do suspeito atirar, pode dar um taser no suspeito caso a janela do carro já esteja quebrada, fazendo com que este saia do carro. Basta então algemar o suspeito.</p>
+            <p>Caso um policial mate outro policial ou mate o suspeito antes dos disparos serem liberados, ele será expulso e perderá 10 níveis.</p>            
+            <p>Quando o jogador cai na água, ele tem 10 segundos para sair, caso contrário, começará a perder vida.</p>
             <p>Qualquer dúvida, utilize o nosso canal de suporte no Discord. Estaremos abertos também a sugestões e nos ajude a melhorar reportando os bugs do nosso sistema.</p>
             <p>Discord: <strong>https://discord.gg/TN2fWeQ</strong></p>
             </div>";
@@ -176,21 +169,6 @@ namespace VidaPolicial
         [Command("skin")]
         public void CMD_skin(IPlayer player) => player.Emit("AbrirSelecionarSkin");
 
-        [Command("staff")]
-        public void CMD_staff(IPlayer player)
-        {
-            var players = Global.Usuarios.Where(x => x.Staff > 0).OrderByDescending(x => x.Staff).ThenBy(x => x.Nome).ToList();
-            if (players.Count == 0)
-            {
-                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Não há nenhum membro da staff online!");
-                return;
-            }
-
-            Functions.EnviarMensagem(player, TipoMensagem.Titulo, $"{Global.NomeServidor} • Staff Online");
-            foreach (var u in players)
-                Functions.EnviarMensagem(player, TipoMensagem.Nenhum, $"{(!string.IsNullOrWhiteSpace(u.Cor) ? $"{{{u.Cor}}}" : string.Empty)}{u.Staff}{{#FFFFFF}} {u.Nome} [{u.ID}]");
-        }
-
         [Command("pm", "/pm (ID ou nome) (mensagem)", GreedyArg = true)]
         public void CMD_pm(IPlayer player, string idNome, string mensagem)
         {
@@ -200,8 +178,8 @@ namespace VidaPolicial
             if (target == null)
                 return;
 
-            Functions.EnviarMensagem(player, TipoMensagem.Nenhum, $"PM para {target.Nome} [{target.ID}]: {mensagem}", "#F2FF43");
-            Functions.EnviarMensagem(target.Player, TipoMensagem.Nenhum, $"PM de {p.Nome} [{p.ID}]: {mensagem}", "#F0E90D");
+            Functions.EnviarMensagem(player, TipoMensagem.Nenhum, $"PM para {(!string.IsNullOrWhiteSpace(target.Cor) ? $"{{{target.Cor}}}" : string.Empty)}{target.Nome} {{#F2FF43}}[{target.ID}]: {mensagem}", "#F2FF43");
+            Functions.EnviarMensagem(target.Player, TipoMensagem.Nenhum, $"PM de {(!string.IsNullOrWhiteSpace(p.Cor) ? $"{{{p.Cor}}}" : string.Empty)}{p.Nome} {{#F2FF43}}[{p.ID}]: {mensagem}", "#F0E90D");
         }
 
         [Command("r", "/r (mensagem)", GreedyArg = true)]
@@ -241,7 +219,7 @@ namespace VidaPolicial
         public void CMD_kick(IPlayer player, string idNome, string motivo)
         {
             var p = Functions.ObterUsuario(player);
-            if ((int)p.Staff < (int)TipoStaff.Helper)
+            if ((int)p.Staff < (int)TipoStaff.Ajudante)
             {
                 Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando!");
                 return;
@@ -257,20 +235,6 @@ namespace VidaPolicial
             Functions.SalvarUsuario(target);
             target.Player.Kick($"{p.Nome} kickou você. Motivo: {motivo}");
         }
-
-        [Command("g", "/g (mensagem)", GreedyArg = true)]
-        public void CMD_g(IPlayer player, string mensagem)
-        {
-            var u = Functions.ObterUsuario(player);
-            if ((int)u.Staff < (int)TipoStaff.Helper)
-            {
-                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando!");
-                return;
-            }
-
-            foreach (var x in Global.Usuarios)
-                Functions.EnviarMensagem(x.Player, TipoMensagem.Nenhum, $"{{{u.Cor}}}{u.Nome}{{#FFFFFF}}: {mensagem}");
-        }
         #endregion
 
         #region Administrator
@@ -278,7 +242,7 @@ namespace VidaPolicial
         public void CMD_ban(IPlayer player, string idNome, int dias, string motivo)
         {
             var p = Functions.ObterUsuario(player);
-            if ((int)p.Staff < (int)TipoStaff.Administrator)
+            if ((int)p.Staff < (int)TipoStaff.Administrador)
             {
                 Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando!");
                 return;
@@ -321,7 +285,7 @@ namespace VidaPolicial
         public void CMD_banoff(IPlayer player, string usuario, int dias, string motivo)
         {
             var p = Functions.ObterUsuario(player);
-            if ((int)p.Staff < (int)TipoStaff.Administrator)
+            if ((int)p.Staff < (int)TipoStaff.Administrador)
             {
                 Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando!");
                 return;
@@ -363,7 +327,7 @@ namespace VidaPolicial
         public void CMD_unban(IPlayer player, string usuario)
         {
             var p = Functions.ObterUsuario(player);
-            if ((int)p.Staff < (int)TipoStaff.Administrator)
+            if ((int)p.Staff < (int)TipoStaff.Administrador)
             {
                 Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando!");
                 return;
@@ -397,7 +361,7 @@ namespace VidaPolicial
         public void CMD_save(IPlayer player)
         {
             var p = Functions.ObterUsuario(player);
-            if ((int)p.Staff < (int)TipoStaff.Administrator)
+            if ((int)p.Staff < (int)TipoStaff.Administrador)
             {
                 Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando!");
                 return;
@@ -419,7 +383,7 @@ namespace VidaPolicial
         public void CMD_v(IPlayer player, string modelo)
         {
             var p = Functions.ObterUsuario(player);
-            if ((int)p.Staff < (int)TipoStaff.Administrator)
+            if ((int)p.Staff < (int)TipoStaff.Administrador)
             {
                 Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando!");
                 return;
@@ -448,7 +412,7 @@ namespace VidaPolicial
         public void CMD_rv(IPlayer player)
         {
             var p = Functions.ObterUsuario(player);
-            if ((int)p.Staff < (int)TipoStaff.Administrator)
+            if ((int)p.Staff < (int)TipoStaff.Administrador)
             {
                 Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando!");
                 return;
@@ -473,7 +437,7 @@ namespace VidaPolicial
         public void CMD_gmx(IPlayer player)
         {
             var p = Functions.ObterUsuario(player);
-            if ((int)p.Staff < (int)TipoStaff.Manager)
+            if ((int)p.Staff < (int)TipoStaff.Diretor)
             {
                 Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando!");
                 return;
@@ -488,11 +452,11 @@ namespace VidaPolicial
         #endregion
 
         #region Manager
-        [Command("setstaff", "/setstaff (ID ou nome) (nível)")]
-        public void CMD_setstaff(IPlayer player, string idNome, int staff)
+        [Command("staff", "/staff (ID ou nome) (nível)")]
+        public void CMD_staff(IPlayer player, string idNome, int staff)
         {
             var p = Functions.ObterUsuario(player);
-            if ((int)p.Staff < (int)TipoStaff.Manager)
+            if ((int)p.Staff < (int)TipoStaff.Diretor)
             {
                 Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando!");
                 return;

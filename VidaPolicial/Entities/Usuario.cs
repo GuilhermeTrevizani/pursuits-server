@@ -47,14 +47,20 @@ namespace VidaPolicial.Entities
             get
             {
                 var cor = string.Empty;
-                if (Staff == TipoStaff.Helper)
+                if (Staff == TipoStaff.Ajudante)
                     cor = "#1abc9c";
-                else if (Staff == TipoStaff.Administrator)
-                    cor = "#f1c40f";
-                else if (Staff == TipoStaff.Manager)
+                else if (Staff == TipoStaff.Administrador)
+                    cor = "#3498db";
+                else if (Staff == TipoStaff.Diretor)
                     cor = "#e81e61";
                 return cor;
             }
         }
+
+        [NotMapped]
+        public string AreaName { get; set; }
+
+        [NotMapped]
+        public string ZoneName { get; set; }
     }
 }

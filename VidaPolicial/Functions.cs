@@ -194,13 +194,17 @@ namespace VidaPolicial
                 x.VeiculoPerseguicao = null;
 
                 foreach (var u in Global.Usuarios)
+                {
                     u.Player.Emit("blip:remove", x.ID);
+                    player.Emit("blip:remove", u.ID);
+                }
             }
 
             player.Model = (uint)PedModel.Agent14;
             player.Armor = 0;
             player.Dimension = 0;
             player.Spawn(new Position(2451.5078f, 3768.4878f, 41.37805f));
+            player.SetSyncedMetaData("congelar", false);
             player.SetSyncedMetaData("atirou", false);
             var tempo = Global.Perseguicoes.Select(y => y.Inicio).DefaultIfEmpty(DateTime.MinValue).Max();
             player.SetSyncedMetaData("tempo", tempo != DateTime.MinValue ? tempo?.ToString("yyyy-MM-dd HH:mm:ss") : string.Empty);
@@ -226,18 +230,10 @@ namespace VidaPolicial
                 new Situacao()
                 {
                     VeiculoFugitivo = VehicleModel.Schafter2,
-                    PosicaoFugitivo = new Situacao.Posicao()
-                    {
-                        Position =  new Position(-104.07033f, -1503.0593f, 33.188965f),
-                        Rotation = new Rotation(0f, 0.015625f, 2.453125f),
-                    },
+                    PosicaoFugitivo = new Situacao.Posicao(new Position(-104.07033f, -1503.0593f, 33.188965f), new Rotation(0f, 0.015625f, 2.453125f)),
                     PosicoesPoliciais = new List<Situacao.Posicao>()
                     {
-                        new Situacao.Posicao()
-                        {
-                            Position = new Position(-55.331867f, -1461.2307f, 31.554565f),
-                            Rotation = new Rotation(0f, 0.046875f, 1.71875f),
-                        },
+                        new Situacao.Posicao(new Position(-55.331867f, -1461.2307f, 31.554565f), new Rotation(0f, 0.046875f, 1.71875f)),
                         new Situacao.Posicao()
                         {
                             Position = new Position(-11.446152f, -1458.277f, 30.071777f),
