@@ -9,7 +9,7 @@ namespace VidaPolicial
         public VehicleModel VeiculoFugitivo { get; set; }
         public Posicao PosicaoFugitivo { get; set; }
         public List<Posicao> PosicoesPoliciais { get; set; }
-     
+
         public class Posicao
         {
             public Posicao(Position position, Rotation rotation)

@@ -3,7 +3,6 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,17 +38,21 @@ namespace LesterBOT
 
         private async Task Client_Ready()
         {
-            await Client.SetGameAsync($"{Client.Guilds.FirstOrDefault(x => x.Id == GuildId)?.Users.Count} jogadores", type: ActivityType.Listening);
+            await Client.SetGameAsync($"{Client.GetGuild(GuildId)?.Users.Count} jogadores", type: ActivityType.Listening);
         }
         
         private async Task Client_UserLeft(SocketGuildUser arg)
         {
-            await Client.SetGameAsync($"{Client.Guilds.FirstOrDefault(x => x.Id == GuildId)?.Users.Count} jogadores", type: ActivityType.Listening);
+            var totalJogadores = Client.GetGuild(GuildId)?.Users.Count;
+            await (Client.GetChannel(751415166163222549) as SocketTextChannel).SendMessageAsync($"{arg.Mention} saiu do servidor. Total de jogadores: {totalJogadores}");
+            await Client.SetGameAsync($"{totalJogadores} jogadores", type: ActivityType.Listening);
         }
 
         private async Task Client_UserJoined(SocketGuildUser arg)
         {
-            await Client.SetGameAsync($"{Client.Guilds.FirstOrDefault(x => x.Id == GuildId)?.Users.Count} jogadores", type: ActivityType.Listening);
+            var totalJogadores = Client.GetGuild(GuildId)?.Users.Count;
+            await (Client.GetChannel(749673751582343208) as SocketTextChannel).SendMessageAsync($"{arg.Mention} entrou no servidor. Total de jogadores: {totalJogadores}");
+            await Client.SetGameAsync($"{totalJogadores} jogadores", type: ActivityType.Listening);
         }
 
         private Task LogAsync(LogMessage log)

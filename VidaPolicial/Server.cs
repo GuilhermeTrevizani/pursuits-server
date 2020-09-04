@@ -10,7 +10,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using System.Timers;
 using VidaPolicial.Entities;
 
@@ -22,7 +21,6 @@ namespace VidaPolicial
         Timer TimerSegundo { get; set; }
         BackgroundWorker BWVerificarPerseguicoes { get; set; }
         BackgroundWorker BWIniciarPerseguicoes { get; set; }
-        bool IsBusy { get; set; }
 
         public override void OnStart()
         {
@@ -83,13 +81,11 @@ namespace VidaPolicial
             TimerSegundo.Start();
         }
 
-        private async void BWIniciarPerseguicoes_DoWork(object sender, DoWorkEventArgs e)
+        private void BWIniciarPerseguicoes_DoWork(object sender, DoWorkEventArgs e)
         {
             var users = Global.Usuarios.Where(x => x.Player.Dimension == 0).ToList();
-            if (users.Count < 2 || IsBusy)
+            if (users.Count < 2)
                 return;
-
-            IsBusy = true;
 
             foreach (var u in users)
             {
@@ -102,7 +98,7 @@ namespace VidaPolicial
                 Functions.EnviarMensagem(u.Player, TipoMensagem.Sucesso, "As perseguições serão montadas em 10 segundos.");
             }
 
-            await Task.Delay(10000);
+            System.Threading.Thread.Sleep(10000);
 
             users = Global.Usuarios.Where(x => x.Player.Dimension == 0).OrderBy(x => Guid.NewGuid()).ToList();
 
@@ -181,8 +177,6 @@ namespace VidaPolicial
                 Global.Perseguicoes.Add(perseguicao);
                 perseguicao.IniciarTimer();
             }
-
-            IsBusy = false;
         }
 
         private void BWVerificarPerseguicoes_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -196,9 +190,6 @@ namespace VidaPolicial
 
         private void BWVerificarPerseguicoes_DoWork(object sender, DoWorkEventArgs e)
         {
-            if (IsBusy)
-                return;
-
             for (var i = 0; i < Global.Perseguicoes.Count; i++)
             {
                 var p = Global.Perseguicoes[i];
@@ -256,7 +247,7 @@ namespace VidaPolicial
                         {
                             tipoBlip = 229;
                             corBlip = 75;
-                            x.GPS = minutosPerseguicao % 2 == 0 ? true : false;
+                            x.GPS = minutosPerseguicao % 2 == 0;
 
                             if (x.GPS)
                             {
@@ -557,10 +548,10 @@ namespace VidaPolicial
             player.SetSyncedMetaData("nametag", $"{user.Nome} [{user.ID}]");
             player.Emit("nametags:Config", true);
             player.Emit("Server:ConfirmarLogin");
-            Functions.SpawnarPlayer(player, IsBusy);
+            Functions.SpawnarPlayer(player, BWIniciarPerseguicoes.IsBusy);
             Functions.EnviarMensagem(player, TipoMensagem.Nenhum, $"Que bom te ver por aqui! Digite {{{Global.CorAmarelo}}}/sobre{{#FFFFFF}} para entender como tudo funciona e {{{Global.CorAmarelo}}}/ajuda{{#FFFFFF}} para visualizar os comandos.");
 
-            if (!IsBusy && Global.Perseguicoes.Count > 0)
+            if (!BWIniciarPerseguicoes.IsBusy && Global.Perseguicoes.Count > 0)
                 Functions.EnviarMensagem(player, TipoMensagem.Nenhum, "As perseguições estão em andamento! Confira o tempo restante no canto inferior direito da tela.");
         }
 
