@@ -38,8 +38,8 @@ namespace VidaPolicial
             Alt.OnClient<IPlayer>("Algemar", Algemar);
             Alt.OnClient<IPlayer>("AtivarDesativarGPS", AtivarDesativarGPS);
             Alt.OnClient<IPlayer>("Atirou", Atirou);
-            Alt.OnClient<IPlayer, string>("SelecionarVeiculo", SelecionarVeiculo);
-            Alt.OnClient<IPlayer, string>("SelecionarSkin", SelecionarSkin);
+            Alt.OnClient<IPlayer, string, string>("SelecionarVeiculo", SelecionarVeiculo);
+            Alt.OnClient<IPlayer, string, string>("SelecionarSkin", SelecionarSkin);
             Alt.OnClient<IPlayer, string, string>("AtualizarInformacoes", AtualizarInformacoes);
 
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = CultureInfo.DefaultThreadCurrentUICulture =
@@ -403,7 +403,7 @@ namespace VidaPolicial
                     .FirstOrDefault();
                 if (method == null)
                 {
-                    Functions.EnviarMensagem(player, TipoMensagem.Erro, $"O comando {mensagem} não existe. Digite /ajuda para visualizar os comandos disponíveis.");
+                    Functions.EnviarMensagem(player, TipoMensagem.Nenhum, $"O comando {{{Global.CorAmarelo}}}{mensagem}{{#FFFFFF}} não existe. Digite {{{Global.CorAmarelo}}}/ajuda{{#FFFFFF}} para visualizar os comandos disponíveis.");
                     return;
                 }
 
@@ -459,7 +459,7 @@ namespace VidaPolicial
 
                 if (methodParams.Length != arr.Count)
                 {
-                    Functions.EnviarMensagem(player, TipoMensagem.Erro, $"Os parâmetros do comando não foram informados corretamente. Use: {command.HelpText}");
+                    Functions.EnviarMensagem(player, TipoMensagem.Nenhum, $"Os parâmetros do comando não foram informados corretamente. Use: {{{Global.CorAmarelo}}}{command.HelpText}");
                     return;
                 }
 
@@ -724,18 +724,18 @@ namespace VidaPolicial
             }
         }
 
-        private void SelecionarVeiculo(IPlayer player, string veiculo)
+        private void SelecionarVeiculo(IPlayer player, string veiculo, string model)
         {
             var p = Functions.ObterUsuario(player);
-            p.Veiculo = veiculo;
-            Functions.EnviarMensagem(player, TipoMensagem.Nenhum, $"Você selecionou o veículo {{{Global.CorAmarelo}}}{veiculo}{{#FFFFFF}} e será usado na próxima perseguição!");
+            p.Veiculo = model;
+            Functions.EnviarMensagem(player, TipoMensagem.Nenhum, $"Você selecionou o veículo {{{Global.CorAmarelo}}}{veiculo} ({model}){{#FFFFFF}} e será usado na próxima perseguição!");
         }
 
-        private void SelecionarSkin(IPlayer player, string skin)
+        private void SelecionarSkin(IPlayer player, string skin, string model)
         {
             var p = Functions.ObterUsuario(player);
-            p.Skin = (long)Enum.GetValues(typeof(PedModel)).Cast<PedModel>().FirstOrDefault(x => x.ToString().ToLower() == skin.ToLower());
-            Functions.EnviarMensagem(player, TipoMensagem.Nenhum, $"Você selecionou a skin {{{Global.CorAmarelo}}}{skin}{{#FFFFFF}} e será usada na próxima perseguição!");
+            p.Skin = (long)Enum.GetValues(typeof(PedModel)).Cast<PedModel>().FirstOrDefault(x => x.ToString().ToLower() == model.ToLower());
+            Functions.EnviarMensagem(player, TipoMensagem.Nenhum, $"Você selecionou a skin {{{Global.CorAmarelo}}}{skin} ({model}){{#FFFFFF}} e será usada na próxima perseguição!");
         }
 
         private void AtualizarInformacoes(IPlayer player, string areaName, string zoneName)
