@@ -7,6 +7,7 @@ namespace VidaPolicial
     {
         public Posicao PosicaoFugitivo { get; set; }
         public List<Posicao> PosicoesPoliciais { get; set; }
+        public TipoPosicaoHelicoptero PosicaoHelicoptero { get; set; } = TipoPosicaoHelicoptero.LosSantos;
 
         public class Posicao
         {

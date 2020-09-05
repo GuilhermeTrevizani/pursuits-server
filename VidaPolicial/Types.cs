@@ -25,4 +25,11 @@
         Staff = 1,
         Morte = 2,
     }
+
+    public enum TipoPosicaoHelicoptero
+    {
+        LosSantos = 1,
+        SandyShores = 2,
+        PaletoBay = 3,
+    }
 }

@@ -21,6 +21,7 @@ namespace VidaPolicial
         public DateTime? DataUltimoAvisoPosicao { get; set; } = null;
         public WeatherType Weather { get; set; }
         public DateTime Horario { get; set; }
+        public bool TemHelicoptero { get; set; } = false;
 
         public object Clone() => MemberwiseClone();
 

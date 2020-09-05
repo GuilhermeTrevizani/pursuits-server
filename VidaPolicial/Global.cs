@@ -26,13 +26,13 @@ namespace VidaPolicial
                     {
                         new Situacao.Posicao(new Position(-55.331867f, -1461.2307f, 31.554565f), new Rotation(0f, 0.046875f, 1.71875f)),
                         new Situacao.Posicao(new Position(-11.446152f, -1458.277f, 30.071777f), new Rotation(0f, 0.03125f, 1.609375f)),
-                        new Situacao.Posicao(new Position(-29.986813f, -1502.9275f, 30.206543f),new Rotation(0.03125f, 0f, 0.90625f)),
-                        new Situacao.Posicao( new Position(63.6f, -1387.4901f, 28.926025f),new Rotation(-0.015625f, 0f, 0.046875f)),
-                        new Situacao.Posicao(new Position(26.10989f, -1357.2924f, 28.808105f),new Rotation(0f, 0.046875f, 1.546875f)),
-                        new Situacao.Posicao(new Position(-58.074726f, -1357.3055f, 28.858643f),new Rotation(0f, 0.046875f, 1.515625f)),
-                        new Situacao.Posicao(new Position(-146.47913f, -1373.3539f, 28.993408f),new Rotation(0f, 0.0625f, 2.125f)),
-                        new Situacao.Posicao(new Position(-201.87692f, -1407.0198f, 30.745728f),new Rotation(0f, 0.046875f, 2.0625f)),
-                        new Situacao.Posicao(new Position(-176.14944f, -1512.8044f, 32.835205f),new Rotation(-0.109375f, 0f, -0.703125f)),
+                        new Situacao.Posicao(new Position(-29.986813f, -1502.9275f, 30.206543f), new Rotation(0.03125f, 0f, 0.90625f)),
+                        new Situacao.Posicao( new Position(63.6f, -1387.4901f, 28.926025f), new Rotation(-0.015625f, 0f, 0.046875f)),
+                        new Situacao.Posicao(new Position(26.10989f, -1357.2924f, 28.808105f), new Rotation(0f, 0.046875f, 1.546875f)),
+                        new Situacao.Posicao(new Position(-58.074726f, -1357.3055f, 28.858643f), new Rotation(0f, 0.046875f, 1.515625f)),
+                        new Situacao.Posicao(new Position(-146.47913f, -1373.3539f, 28.993408f), new Rotation(0f, 0.0625f, 2.125f)),
+                        new Situacao.Posicao(new Position(-201.87692f, -1407.0198f, 30.745728f), new Rotation(0f, 0.046875f, 2.0625f)),
+                        new Situacao.Posicao(new Position(-176.14944f, -1512.8044f, 32.835205f), new Rotation(-0.109375f, 0f, -0.703125f)),
                     },
                 },
                 new Situacao()
@@ -85,6 +85,7 @@ namespace VidaPolicial
                 },
                 new Situacao()
                 {
+                    PosicaoHelicoptero = TipoPosicaoHelicoptero.SandyShores,
                     PosicaoFugitivo = new Situacao.Posicao(new Rotation(1635.0989f, 3765.389f, 34.40222f), new Rotation(0f, 0.015625f, 2.25f)),
                     PosicoesPoliciais = new List<Situacao.Posicao>()
                     {
@@ -101,6 +102,7 @@ namespace VidaPolicial
                 },
                 new Situacao()
                 {
+                    PosicaoHelicoptero = TipoPosicaoHelicoptero.PaletoBay,
                     PosicaoFugitivo = new Situacao.Posicao(new Rotation(-356.33408f, 6186.949f, 30.813232f), new Rotation(0f, 0.046875f, 2.390625f)),
                     PosicoesPoliciais = new List<Situacao.Posicao>()
                     {

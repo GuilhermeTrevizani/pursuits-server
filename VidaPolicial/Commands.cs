@@ -93,6 +93,11 @@ namespace VidaPolicial
                     <td>Player</td>
                     <td>/dm</td>
                     <td>Entra na arena DM</td>
+                </tr>
+                <tr>
+                    <td>Player</td>
+                    <td>/helicoptero /heli</td>
+                    <td>Ativa/desativa opção por helicóptero nas perseguições</td>
                 </tr>";
 
             if ((int)p.Staff >= (int)TipoStaff.Ajudante)
@@ -232,6 +237,14 @@ namespace VidaPolicial
             p.TimeStamp = !p.TimeStamp;
             player.Emit("chat:activateTimeStamp", p.TimeStamp);
             Functions.EnviarMensagem(player, TipoMensagem.Sucesso, $"Você {(!p.TimeStamp ? "des" : string.Empty)}ativou o timestamp do chat.", notify: true);
+        }
+
+        [Command("helicoptero", Alias = "heli")]
+        public void CMD_helicoptero(IPlayer player)
+        {
+            var p = Functions.ObterUsuario(player);
+            p.Helicoptero = !p.Helicoptero;
+            Functions.EnviarMensagem(player, TipoMensagem.Sucesso, $"Você {(!p.Helicoptero ? "des" : string.Empty)}ativou a opção pelo helicóptero nas perseguições.", notify: true);
         }
 
         [Command("dm")]
@@ -456,7 +469,6 @@ namespace VidaPolicial
 
             var veh = Alt.CreateVehicle(modelo, player.Position, player.Rotation);
             veh.Dimension = player.Dimension;
-            veh.SetPosition(player.Position.X, player.Position.Y, player.Position.Z);
             veh.NumberplateText = "ADMIN";
             player.Emit("setPedIntoVehicle", veh, -1);
         }

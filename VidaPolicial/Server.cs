@@ -107,6 +107,7 @@ namespace VidaPolicial
                 Weather = (WeatherType)new List<uint> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13 }.OrderBy(x => Guid.NewGuid()).FirstOrDefault(), 
                 Horario = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, random.Next(0, 23), random.Next(0, 59), 0),
             };
+
             foreach (var u in users)
             {
                 var index = users.IndexOf(u);
@@ -133,7 +134,9 @@ namespace VidaPolicial
                 u.Policial = false;
                 var pedModel = (uint)u.Skin;
                 var pos = new Situacao.Posicao();
-                var veh = u.Veiculo;
+                var veh = u.Helicoptero && !perseguicao.TemHelicoptero && perseguicao.IDFugitivo != 0 && users.Count - Global.Perseguicoes.Count * 10 >= 3 ? "POLMAV" : u.Veiculo;
+                if (veh == "POLMAV")
+                    perseguicao.TemHelicoptero = true;
 
                 if (perseguicao.IDFugitivo == 0)
                 {
@@ -146,7 +149,19 @@ namespace VidaPolicial
                 else
                 {
                     u.Policial = true;
-                    pos = situacao.PosicoesPoliciais[users.IndexOf(u) - 1];
+                    if (veh == "POLMAV")
+                    {
+                        if (situacao.PosicaoHelicoptero == TipoPosicaoHelicoptero.LosSantos)
+                            pos = new Situacao.Posicao(new Position(449.27472f, -981.33624f, 44.073975f), new Rotation(0f, 0f, 1.609375f));
+                        else if (situacao.PosicaoHelicoptero == TipoPosicaoHelicoptero.SandyShores)
+                            pos = new Situacao.Posicao(new Rotation(1770.0264f, 3239.7231f, 42.506958f), new Rotation(0.015625f, -0.03125f, -1.328125f));
+                        else if (situacao.PosicaoHelicoptero == TipoPosicaoHelicoptero.PaletoBay)
+                            pos = new Situacao.Posicao(new Rotation(-475.22638f, 5988.6724f, 31.723022f), new Rotation(0f, 0f, -0.671875f));
+                    }
+                    else
+                    {
+                        pos = situacao.PosicoesPoliciais[users.IndexOf(u) - 1];
+                    }
                 }
 
                 u.Player.Model = pedModel;
