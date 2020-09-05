@@ -25,6 +25,7 @@ namespace VidaPolicial.Entities
         public long HardwareIdExHashRegistro { get; set; }
         public long HardwareIdHashUltimoAcesso { get; set; }
         public long HardwareIdExHashUltimoAcesso { get; set; }
+        public bool TimeStamp { get; set; } = true;
 
         [NotMapped]
         public IPlayer Player { get; set; }

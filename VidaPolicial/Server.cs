@@ -114,7 +114,7 @@ namespace VidaPolicial
                 u.Player.SetSyncedMetaData("congelar", true);
 
                 var index = users.IndexOf(u);
-                if (index % 10 == 0 && index != 0)
+                if (index % 10 == 0 && index != 0) 
                 {
                     Global.Perseguicoes.Add(perseguicao);
                     perseguicao.IniciarTimer();
@@ -548,6 +548,7 @@ namespace VidaPolicial
             player.SetSyncedMetaData("nametag", $"{user.Nome} [{user.ID}]");
             player.Emit("nametags:Config", true);
             player.Emit("Server:ConfirmarLogin");
+            player.Emit("chat:activateTimeStamp", user.TimeStamp);
             Functions.SpawnarPlayer(player, BWIniciarPerseguicoes.IsBusy);
             Functions.EnviarMensagem(player, TipoMensagem.Nenhum, $"Que bom te ver por aqui! Digite {{{Global.CorAmarelo}}}/sobre{{#FFFFFF}} para entender como tudo funciona e {{{Global.CorAmarelo}}}/ajuda{{#FFFFFF}} para visualizar os comandos.");
 

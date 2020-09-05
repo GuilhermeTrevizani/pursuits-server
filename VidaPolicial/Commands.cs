@@ -81,7 +81,12 @@ namespace VidaPolicial
                     <td>Player</td>
                     <td>/desistir</td>
                     <td>Desiste de uma perseguição sendo policial ou bandido</td>
-                </tr>";
+                </tr>
+                <tr>
+                    <td>Player</td>
+                    <td>/timestamp</td>
+                    <td>Ativa/desativa timestamp do chat</td>
+                </tr>"; 
 
             if ((int)p.Staff >= (int)TipoStaff.Ajudante)
                 html += $@"<tr>
@@ -211,6 +216,15 @@ namespace VidaPolicial
                 Functions.EnviarMensagem(u.Player, TipoMensagem.Erro, $"{p.Nome} desistiu da perseguição.");
 
             Functions.SpawnarPlayer(player);
+        }
+
+        [Command("timestamp")]
+        public void CMD_timestamp(IPlayer player)
+        {
+            var p = Functions.ObterUsuario(player);
+            p.TimeStamp = !p.TimeStamp;
+            player.Emit("chat:activateTimeStamp", p.TimeStamp);
+            Functions.EnviarMensagem(player, TipoMensagem.Sucesso, $"Você {(!p.TimeStamp ? "des" : string.Empty)}ativou o timestamp do chat.", notify: true);
         }
         #endregion
 
