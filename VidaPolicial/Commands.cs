@@ -98,6 +98,11 @@ namespace VidaPolicial
                     <td>Player</td>
                     <td>/helicoptero /heli</td>
                     <td>Ativa/desativa opção por helicóptero nas perseguições</td>
+                </tr>
+                <tr>
+                    <td>Player</td>
+                    <td>/sair</td>
+                    <td>Sai da arena DM</td>
                 </tr>";
 
             if ((int)p.Staff >= (int)TipoStaff.Ajudante)
@@ -252,32 +257,41 @@ namespace VidaPolicial
         {
             if (player.Dimension != 0)
             {
-                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você está em uma perseguição!");
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você está em uma perseguição.");
                 return;
             }
 
-            var posicoes = new List<Situacao.Posicao>()
+            var p = Functions.ObterUsuario(player);
+            if (p.ArenaDM)
             {
-                new Situacao.Posicao(new Position(3074.7825f, -4784.4526f, 6.060791f), new Rotation(0f, 0f, -2.7705386f)),
-                new Situacao.Posicao(new Position(3076.1143f, -4739.921f, 6.060791f), new Rotation(0f, 0f, 0.1978956f)),
-                new Situacao.Posicao(new Position(3055.8462f, -4714.391f, 6.060791f), new Rotation(0f, 0f, 0.0494739f)),
-                new Situacao.Posicao(new Position(3067.6748f, -4683.811f, 6.060791f), new Rotation(0f, 0f, 1.1873736f)),
-            };
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você já está na arena DM.");
+                return;
+            }
 
-            var pos = posicoes[new Random().Next(0, 3)];
+            Functions.SpawnarPlayerArenaDM(player);
+        }
 
-            player.Position = pos.Position;
-            player.Rotation = pos.Rotation;
-            player.Health = player.MaxHealth;
-            player.Armor = player.MaxArmor;
-            player.GiveWeapon(WeaponModel.PumpShotgun, 1000, true);
-            player.GiveWeapon(WeaponModel.MicroSMG, 1000, true);
-            player.GiveWeapon(WeaponModel.Pistol, 1000, true);
+        [Command("sair")]
+        public void CMD_sair(IPlayer player)
+        {
+            if (player.Dimension != 0)
+            {
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você está em uma perseguição.");
+                return;
+            }
 
             var p = Functions.ObterUsuario(player);
-            p.ArenaDM = true;
+            if (!p.ArenaDM)
+            {
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não está na arena DM.");
+                return;
+            }
+
+            p.ArenaDM = false;
+            Functions.SpawnarPlayer(player);
+
             foreach (var u in Global.Usuarios.Where(x => x.Player.Dimension == 0))
-                Functions.EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"{{{Global.CorAmarelo}}}{p.Nome}{{#FFFFFF}} foi para a arena DM. {{{Global.CorAmarelo}}}(/dm)");
+                Functions.EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"{{{Global.CorAmarelo}}}{p.Nome}{{#FFFFFF}} saiu da arena DM. {{{Global.CorAmarelo}}}(/sair)");
         }
         #endregion
 
