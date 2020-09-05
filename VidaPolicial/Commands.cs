@@ -1,7 +1,9 @@
 ﻿using AltV.Net;
+using AltV.Net.Data;
 using AltV.Net.Elements.Entities;
 using AltV.Net.Enums;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace VidaPolicial
@@ -86,7 +88,12 @@ namespace VidaPolicial
                     <td>Player</td>
                     <td>/timestamp</td>
                     <td>Ativa/desativa timestamp do chat</td>
-                </tr>"; 
+                </tr>
+                <tr>
+                    <td>Player</td>
+                    <td>/dm</td>
+                    <td>Entra na arena DM</td>
+                </tr>";
 
             if ((int)p.Staff >= (int)TipoStaff.Ajudante)
                 html += $@"<tr>
@@ -225,6 +232,39 @@ namespace VidaPolicial
             p.TimeStamp = !p.TimeStamp;
             player.Emit("chat:activateTimeStamp", p.TimeStamp);
             Functions.EnviarMensagem(player, TipoMensagem.Sucesso, $"Você {(!p.TimeStamp ? "des" : string.Empty)}ativou o timestamp do chat.", notify: true);
+        }
+
+        [Command("dm")]
+        public void CMD_dm(IPlayer player)
+        {
+            if (player.Dimension != 0)
+            {
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você está em uma perseguição!");
+                return;
+            }
+
+            var posicoes = new List<Situacao.Posicao>()
+            {
+                new Situacao.Posicao(new Position(3074.7825f, -4784.4526f, 6.060791f), new Rotation(0f, 0f, -2.7705386f)),
+                new Situacao.Posicao(new Position(3076.1143f, -4739.921f, 6.060791f), new Rotation(0f, 0f, 0.1978956f)),
+                new Situacao.Posicao(new Position(3055.8462f, -4714.391f, 6.060791f), new Rotation(0f, 0f, 0.0494739f)),
+                new Situacao.Posicao(new Position(3067.6748f, -4683.811f, 6.060791f), new Rotation(0f, 0f, 1.1873736f)),
+            };
+
+            var pos = posicoes[new Random().Next(0, 3)];
+
+            player.Position = pos.Position;
+            player.Rotation = pos.Rotation;
+            player.Health = player.MaxHealth;
+            player.Armor = player.MaxArmor;
+            player.GiveWeapon(WeaponModel.PumpShotgun, 1000, true);
+            player.GiveWeapon(WeaponModel.MicroSMG, 1000, true);
+            player.GiveWeapon(WeaponModel.Pistol, 1000, true);
+
+            var p = Functions.ObterUsuario(player);
+            p.ArenaDM = true;
+            foreach (var u in Global.Usuarios.Where(x => x.Player.Dimension == 0))
+                Functions.EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"{{{Global.CorAmarelo}}}{p.Nome}{{#FFFFFF}} foi para a arena DM. {{{Global.CorAmarelo}}}(/dm)");
         }
         #endregion
 
@@ -383,8 +423,7 @@ namespace VidaPolicial
 
             if (player.IsInVehicle)
             {
-                player.Emit("alt:log", $"POS: {player.Vehicle.Position.X.ToString().Replace(",", ".")}f, {player.Vehicle.Position.Y.ToString().Replace(",", ".")}f, {player.Vehicle.Position.Z.ToString().Replace(",", ".")}f");
-                player.Emit("alt:log", $"ROT: {player.Vehicle.Rotation.Roll.ToString().Replace(",", ".")}f, {player.Vehicle.Rotation.Pitch.ToString().Replace(",", ".")}f, {player.Vehicle.Rotation.Yaw.ToString().Replace(",", ".")}f");
+                player.Emit("alt:log", $"new Situacao.Posicao(new Rotation({player.Vehicle.Position.X.ToString().Replace(",", ".")}f, {player.Vehicle.Position.Y.ToString().Replace(",", ".")}f, {player.Vehicle.Position.Z.ToString().Replace(",", ".")}f), new Rotation({player.Vehicle.Rotation.Roll.ToString().Replace(",", ".")}f, {player.Vehicle.Rotation.Pitch.ToString().Replace(",", ".")}f, {player.Vehicle.Rotation.Yaw.ToString().Replace(",", ".")}f))");
             }
             else
             {
