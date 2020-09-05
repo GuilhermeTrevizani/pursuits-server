@@ -213,7 +213,7 @@ namespace VidaPolicial
             var p = Functions.ObterUsuario(player);
 
             foreach (var u in Global.Usuarios.Where(x => x.Player.Dimension == player.Dimension))
-                Functions.EnviarMensagem(u.Player, TipoMensagem.Erro, $"{p.Nome} desistiu da perseguição.");
+                Functions.EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"{{{Global.CorAmarelo}}}{p.Nome}{{#FFFFFF}} desistiu da perseguição.");
 
             Functions.SpawnarPlayer(player);
         }

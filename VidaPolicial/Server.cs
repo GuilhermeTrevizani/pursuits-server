@@ -114,7 +114,7 @@ namespace VidaPolicial
                 u.Player.SetSyncedMetaData("congelar", true);
 
                 var index = users.IndexOf(u);
-                if (index % 10 == 0 && index != 0) 
+                if (index % 10 == 0 && index != 0)
                 {
                     Global.Perseguicoes.Add(perseguicao);
                     perseguicao.IniciarTimer();
@@ -164,6 +164,12 @@ namespace VidaPolicial
                 u.Player.Health = u.Player.MaxHealth;
                 u.Player.Armor = 0;
                 u.VeiculoPerseguicao = Alt.CreateVehicle(veh, pos.Position, pos.Rotation);
+                if (!u.Policial)
+                {
+                    var random = new Random();
+                    u.VeiculoPerseguicao.PrimaryColorRgb = new Rgba((byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255), 255);
+                    u.VeiculoPerseguicao.SecondaryColorRgb = u.VeiculoPerseguicao.PrimaryColorRgb;
+                }
                 u.VeiculoPerseguicao.ManualEngineControl = true;
                 u.VeiculoPerseguicao.Dimension = perseguicao.ID;
                 u.VeiculoPerseguicao.NumberplateText = u.Policial ? "LSPD" : "CRIME";
@@ -207,11 +213,11 @@ namespace VidaPolicial
                     if (bandido != null)
                     {
                         bandido.Level += 5;
-                        msg += $"O bandido {bandido.Nome} conseguiu escapar!";
+                        msg += $"O bandido {{{Global.CorAmarelo}}}{bandido.Nome}{{#FFFFFF}} conseguiu escapar!";
                     }
                     else
                     {
-                        msg += "Os policiais capturaram o bandido!";
+                        msg += $"Os {{{Global.CorAmarelo}}}policiais{{#FFFFFF}} capturaram o bandido!";
                     }
 
                     Global.Perseguicoes.Remove(p);
@@ -221,7 +227,7 @@ namespace VidaPolicial
                         if (bandido == null && x.Policial)
                             x.Level++;
 
-                        Functions.EnviarMensagem(x.Player, TipoMensagem.Sucesso, msg);
+                        Functions.EnviarMensagem(x.Player, TipoMensagem.Nenhum, msg);
                         if (!x.Player.IsDead)
                             Functions.SpawnarPlayer(x.Player);
                     }
