@@ -2,6 +2,7 @@
 using AltV.Net.Elements.Entities;
 using AltV.Net.Enums;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -198,14 +199,12 @@ namespace VidaPolicial
                 }
             }
 
-            x.ArenaDM = false;
             player.SetDateTime(DateTime.Now);
             player.SetWeather(WeatherType.Clear);
             player.Model = (uint)PedModel.Agent14;
             player.Health = player.MaxHealth;
             player.Armor = player.MaxArmor;
             player.Dimension = 0;
-            player.Spawn(new Position(2451.5078f, 3768.4878f, 41.37805f));
             player.SetSyncedMetaData("congelar", false);
             player.SetSyncedMetaData("atirou", false);
             var tempo = Global.Perseguicoes.Select(y => y.Inicio).DefaultIfEmpty(DateTime.MinValue).Max();
@@ -213,6 +212,39 @@ namespace VidaPolicial
             player.SetSyncedMetaData("podeatirar", true);
             player.Emit("setPlayerCanDoDriveBy", true);
             player.Emit("toggleGameControls", true);
+
+            if (x.ArenaDM)
+                SpawnarPlayerArenaDM(player, false);
+            else
+                player.Spawn(new Position(2451.5078f, 3768.4878f, 41.37805f));
+        }
+
+        public static void SpawnarPlayerArenaDM(IPlayer player, bool exibirAviso = true)
+        {
+            var posicoes = new List<Situacao.Posicao>()
+            {
+                new Situacao.Posicao(new Position(3074.7825f, -4784.4526f, 6.060791f), new Rotation(0f, 0f, -2.7705386f)),
+                new Situacao.Posicao(new Position(3076.1143f, -4739.921f, 6.060791f), new Rotation(0f, 0f, 0.1978956f)),
+                new Situacao.Posicao(new Position(3055.8462f, -4714.391f, 6.060791f), new Rotation(0f, 0f, 0.0494739f)),
+                new Situacao.Posicao(new Position(3067.6748f, -4683.811f, 6.060791f), new Rotation(0f, 0f, 1.1873736f)),
+            };
+
+            var pos = posicoes[new Random().Next(0, 3)];
+
+            player.Spawn(pos.Position);
+            player.Rotation = pos.Rotation;
+            player.GiveWeapon(WeaponModel.PumpShotgun, 1000, false);
+            player.GiveWeapon(WeaponModel.MicroSMG, 1000, false);
+            player.GiveWeapon(WeaponModel.Pistol, 1000, true);
+
+            var p = ObterUsuario(player);
+            p.ArenaDM = true;
+
+            if (exibirAviso)
+            {
+                foreach (var u in Global.Usuarios.Where(x => x.Player.Dimension == 0))
+                    EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"{{{Global.CorAmarelo}}}{p.Nome}{{#FFFFFF}} foi para a arena DM. {{{Global.CorAmarelo}}}(/dm)");
+            }
         }
     }
 }
