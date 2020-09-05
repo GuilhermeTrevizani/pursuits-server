@@ -95,7 +95,7 @@ namespace VidaPolicial
                 u.Player.Emit("toggleGameControls", false);
                 u.Player.SetSyncedMetaData("congelar", true);
                 u.Player.SetSyncedMetaData("tempo", string.Empty);
-                Functions.EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"As perseguições serão preparadas em {{{Global.CorAmarelo}}}10 segundos{{#FFFFFF}}.");
+                Functions.EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"As perseguições serão preparadas em {{{Global.CorAmarelo}}}10 {{#FFFFFF}}segundos.");
             }
 
             System.Threading.Thread.Sleep(10000);
@@ -169,7 +169,7 @@ namespace VidaPolicial
                 u.VeiculoPerseguicao.NumberplateText = u.Policial ? "LSPD" : "CRIME";
                 u.VeiculoPerseguicao.LockState = VehicleLockState.Unlocked;
                 u.Player.Emit("setPedIntoVehicle", u.VeiculoPerseguicao, -1, true);
-                Functions.EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"A perseguição iniciará em {{{Global.CorAmarelo}}}10 segundos{{#FFFFFF}}.");
+                Functions.EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"A perseguição iniciará em {{{Global.CorAmarelo}}}10 {{#FFFFFF}}segundos.");
             }
 
             if (users.Count % 10 != 0)
@@ -320,9 +320,8 @@ namespace VidaPolicial
                     {
                         pKiller.Level -= 10;
                         foreach (var u in players)
-                            Functions.EnviarMensagem(u.Player, TipoMensagem.Erro, $"{pKiller.Nome} matou um policial ou ele matou o suspeito antes de atirar.");
-                        Functions.SalvarUsuario(pKiller);
-                        playerKiller.Kick("Você matou um policial ou matou o suspeito antes de atirar e por isso perdeu 10 níveis.");
+                            Functions.EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"{{{Global.CorAmarelo}}}{pKiller.Nome} {{#FFFFFF}}matou um policial ou ele matou o suspeito antes de atirar e por isso perdeu {{{Global.CorAmarelo}}}10 {{#FFFFFF}}níveis.");
+                        Functions.SpawnarPlayer(playerKiller);
                     }
                     else
                     {
@@ -333,12 +332,12 @@ namespace VidaPolicial
                     }
 
                     foreach (var u in players)
-                        Functions.EnviarMensagem(u.Player, TipoMensagem.Erro, $"{pKiller.Nome} matou {p.Nome}.");
+                        Functions.EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"{{{Global.CorAmarelo}}}{pKiller.Nome} {{#FFFFFF}}matou {{{Global.CorAmarelo}}}{p.Nome}{{#FFFFFF}}.");
                 }
                 else
                 {
                     foreach (var u in players)
-                        Functions.EnviarMensagem(u.Player, TipoMensagem.Erro, $"{p.Nome} se matou.");
+                        Functions.EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"{{{Global.CorAmarelo}}}{p.Nome} {{#FFFFFF}}se matou.");
                 }
             }
 
