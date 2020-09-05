@@ -95,7 +95,7 @@ namespace VidaPolicial
                 u.Player.Emit("toggleGameControls", false);
                 u.Player.SetSyncedMetaData("congelar", true);
                 u.Player.SetSyncedMetaData("tempo", string.Empty);
-                Functions.EnviarMensagem(u.Player, TipoMensagem.Sucesso, "As perseguições serão montadas em 10 segundos.");
+                Functions.EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"As perseguições serão preparadas em {{{Global.CorAmarelo}}}10 segundos{{#FFFFFF}}.");
             }
 
             System.Threading.Thread.Sleep(10000);
@@ -169,7 +169,7 @@ namespace VidaPolicial
                 u.VeiculoPerseguicao.NumberplateText = u.Policial ? "LSPD" : "CRIME";
                 u.VeiculoPerseguicao.LockState = VehicleLockState.Unlocked;
                 u.Player.Emit("setPedIntoVehicle", u.VeiculoPerseguicao, -1, true);
-                Functions.EnviarMensagem(u.Player, TipoMensagem.Sucesso, "A perseguição iniciará em 10 segundos.");
+                Functions.EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"A perseguição iniciará em {{{Global.CorAmarelo}}}10 segundos{{#FFFFFF}}.");
             }
 
             if (users.Count % 10 != 0)
@@ -296,7 +296,7 @@ namespace VidaPolicial
 
         private void OnPlayerDamage(IPlayer player, IEntity attacker, uint weapon, ushort damage)
         {
-            if (!(attacker is IPlayer playerAttacker) || player.Dimension == 0)
+            if (!(attacker is IPlayer playerAttacker) || player.Dimension == 0 || playerAttacker == player)
                 return;
 
             var pAttacker = Functions.ObterUsuario(playerAttacker);
@@ -729,14 +729,14 @@ namespace VidaPolicial
         {
             var p = Functions.ObterUsuario(player);
             p.Veiculo = veiculo;
-            Functions.EnviarMensagem(player, TipoMensagem.Sucesso, $"Você selecionou o veículo {veiculo} e será usado na próxima perseguição!");
+            Functions.EnviarMensagem(player, TipoMensagem.Nenhum, $"Você selecionou o veículo {{{Global.CorAmarelo}}}{veiculo}{{#FFFFFF}} e será usado na próxima perseguição!");
         }
 
         private void SelecionarSkin(IPlayer player, string skin)
         {
             var p = Functions.ObterUsuario(player);
             p.Skin = (long)Enum.GetValues(typeof(PedModel)).Cast<PedModel>().FirstOrDefault(x => x.ToString().ToLower() == skin.ToLower());
-            Functions.EnviarMensagem(player, TipoMensagem.Sucesso, $"Você selecionou a skin {skin} e será usada na próxima perseguição!");
+            Functions.EnviarMensagem(player, TipoMensagem.Nenhum, $"Você selecionou a skin {{{Global.CorAmarelo}}}{skin}{{#FFFFFF}} e será usada na próxima perseguição!");
         }
 
         private void AtualizarInformacoes(IPlayer player, string areaName, string zoneName)
