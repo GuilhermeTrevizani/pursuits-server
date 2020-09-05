@@ -1,9 +1,7 @@
 ﻿using AltV.Net;
-using AltV.Net.Data;
 using AltV.Net.Elements.Entities;
 using AltV.Net.Enums;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace VidaPolicial
@@ -469,11 +467,11 @@ namespace VidaPolicial
                 return;
             }
 
-            if (player.Dimension != 0)
+            /*if (player.Dimension != 0)
             {
                 Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não pode criar um veículo em uma perseguição!");
                 return;
-            }
+            }*/
 
             if (!Enum.GetValues(typeof(VehicleModel)).Cast<VehicleModel>().Any(x => x.ToString().ToLower() == modelo.ToLower()))
             {
@@ -484,6 +482,7 @@ namespace VidaPolicial
             var veh = Alt.CreateVehicle(modelo, player.Position, player.Rotation);
             veh.Dimension = player.Dimension;
             veh.NumberplateText = "ADMIN";
+            veh.EngineOn = true;
             player.Emit("setPedIntoVehicle", veh, -1);
         }
 
