@@ -29,8 +29,11 @@ namespace VidaPolicial
         private void TimerInicio_Elapsed(object sender, ElapsedEventArgs e)
         {
             Inicio = DataUltimoAvisoPosicao = DateTime.Now;
+            var users = Global.Usuarios.Where(x => x.Player.Dimension == ID);
+            var fugitivo = users.FirstOrDefault(x => !x.Policial)?.Nome;
+            var vehicles = Alt.GetAllVehicles().Where(x => x.Dimension == ID);
 
-            foreach (var u in Global.Usuarios.Where(x => x.Player.Dimension == ID))
+            foreach (var u in users)
             {
                 u.Player.SetSyncedMetaData("tempo", Inicio?.ToString("yyyy-MM-dd HH:mm:ss"));
                 u.Player.SetSyncedMetaData("congelar", false);
@@ -41,13 +44,13 @@ namespace VidaPolicial
                     u.Player.Emit("setPlayerCanDoDriveBy", true);
                 }
 
-                foreach (var v in Alt.GetAllVehicles().Where(x => x.Dimension == ID))
+                foreach (var v in vehicles)
                 {
                     u.Player.Emit("vehicle:setVehicleEngineOn", v, true);
                     u.Player.Emit("toggleGameControls", true, v);
                 }
 
-                Functions.EnviarMensagem(u.Player, TipoMensagem.Sucesso, "A perseguição iniciou!");
+                Functions.EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"A perseguição iniciou. O bandido é: {{{Global.CorAmarelo}}}{fugitivo}");
             }
 
             TimerInicio?.Stop();
