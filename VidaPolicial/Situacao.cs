@@ -1,12 +1,10 @@
 ﻿using AltV.Net.Data;
-using AltV.Net.Enums;
 using System.Collections.Generic;
 
 namespace VidaPolicial
 {
     public class Situacao
     {
-        public VehicleModel VeiculoFugitivo { get; set; }
         public Posicao PosicaoFugitivo { get; set; }
         public List<Posicao> PosicoesPoliciais { get; set; }
 
