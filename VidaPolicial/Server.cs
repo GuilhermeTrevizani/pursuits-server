@@ -47,12 +47,8 @@ namespace VidaPolicial
 
             var config = JsonConvert.DeserializeObject<Configuracao>(File.ReadAllText("settingsvidapolicial.json"));
             Global.NomeServidor = "GTA V Pursuits";
-            Global.Weather = WeatherType.Clear;
             Global.MaxPlayers = config.MaxPlayers;
             Global.ConnectionString = $"Server={config.DBHost};Database={config.DBName};Uid={config.DBUser};Password={config.DBPassword}";
-            Global.Usuarios = new List<Usuario>();
-            Global.Perseguicoes = new List<Perseguicao>();
-            Functions.CarregarSituacoes();
 
             using var context = new DatabaseContext();
             Global.Parametros = context.Parametros.FirstOrDefault();
@@ -100,19 +96,19 @@ namespace VidaPolicial
 
             System.Threading.Thread.Sleep(10000);
 
-            users = Global.Usuarios.Where(x => x.Player.Dimension == 0).OrderBy(x => Guid.NewGuid()).ToList();
-
             var situacao = Global.Situacoes.OrderBy(x => Guid.NewGuid()).FirstOrDefault();
 
+            users = Global.Usuarios.Where(x => x.Player.Dimension == 0).OrderBy(x => Guid.NewGuid()).ToList();
+
+            var random = new Random();
             var perseguicao = new Perseguicao()
             {
                 ID = Global.Perseguicoes.Select(x => x.ID).DefaultIfEmpty(0).Max() + 1,
+                Weather = (WeatherType)new List<uint> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13 }.OrderBy(x => Guid.NewGuid()).FirstOrDefault(), 
+                Horario = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, random.Next(0, 23), random.Next(0, 59), 0),
             };
             foreach (var u in users)
             {
-                u.Player.Emit("toggleGameControls", false);
-                u.Player.SetSyncedMetaData("congelar", true);
-
                 var index = users.IndexOf(u);
                 if (index % 10 == 0 && index != 0)
                 {
@@ -125,6 +121,13 @@ namespace VidaPolicial
                     };
                 }
 
+                u.ArenaDM = false;
+                u.Player.Emit("setPlayerCanDoDriveBy", false);
+                u.Player.SetSyncedMetaData("podeatirar", false);
+                u.Player.Emit("toggleGameControls", false);
+                u.Player.SetSyncedMetaData("congelar", true);
+                u.Player.SetWeather(perseguicao.Weather);
+                u.Player.SetDateTime(perseguicao.Horario);
                 u.Player.SetSyncedMetaData("tempo", string.Empty);
                 u.Player.Dimension = perseguicao.ID;
                 u.Policial = false;
@@ -134,9 +137,9 @@ namespace VidaPolicial
 
                 if (perseguicao.IDFugitivo == 0)
                 {
-                    pedModel = (uint)PedModel.Claypain;
+                    pedModel = (uint)Global.SkinsFugitivo.OrderBy(x => Guid.NewGuid()).FirstOrDefault();
                     pos = new Situacao.Posicao(situacao.PosicaoFugitivo.Position, situacao.PosicaoFugitivo.Rotation);
-                    veh = situacao.VeiculoFugitivo.ToString();
+                    veh = Global.VeiculosFugitivo.OrderBy(x => Guid.NewGuid()).FirstOrDefault().ToString();
                     perseguicao.IDFugitivo = u.ID;
                     u.GPS = true;
                 }
@@ -164,9 +167,9 @@ namespace VidaPolicial
                 u.Player.Health = u.Player.MaxHealth;
                 u.Player.Armor = 0;
                 u.VeiculoPerseguicao = Alt.CreateVehicle(veh, pos.Position, pos.Rotation);
+                u.VeiculoPerseguicao.SetWindowOpened(0, true);
                 if (!u.Policial)
                 {
-                    var random = new Random();
                     u.VeiculoPerseguicao.PrimaryColorRgb = new Rgba((byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255), 255);
                     u.VeiculoPerseguicao.SecondaryColorRgb = u.VeiculoPerseguicao.PrimaryColorRgb;
                 }
@@ -187,10 +190,7 @@ namespace VidaPolicial
 
         private void BWVerificarPerseguicoes_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            if (Global.Perseguicoes.Count > 0)
-                return;
-
-            if (!BWIniciarPerseguicoes.IsBusy)
+            if (!BWIniciarPerseguicoes.IsBusy && Global.Perseguicoes.Count == 0)
                 BWIniciarPerseguicoes.RunWorkerAsync();
         }
 
@@ -312,9 +312,9 @@ namespace VidaPolicial
 
         private void OnPlayerDead(IPlayer player, IEntity killer, uint weapon)
         {
+            var p = Functions.ObterUsuario(player);
             if (player.Dimension != 0)
             {
-                var p = Functions.ObterUsuario(player);
                 var players = Global.Usuarios.Where(x => x.Player.Dimension == player.Dimension);
 
                 if (killer is IPlayer playerKiller && playerKiller != player)
@@ -346,6 +346,17 @@ namespace VidaPolicial
                         Functions.EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"{{{Global.CorAmarelo}}}{p.Nome} {{#FFFFFF}}se matou.");
                 }
             }
+            else if (p.ArenaDM)
+            {
+                if (killer is IPlayer playerKiller && playerKiller != player)
+                {
+                    playerKiller.Health = playerKiller.MaxHealth;
+                    playerKiller.Armor = playerKiller.MaxArmor;
+                    var pKiller = Functions.ObterUsuario(playerKiller);
+                    foreach (var u in Global.Usuarios.Where(x => p.ArenaDM))
+                        u.Player.Emit("displayAdvancedNotification", $"~r~{pKiller.Nome} ~w~matou ~r~{p.Nome}", "Arena DM", string.Empty, "CHAR_LESTER_DEATHWISH", 0, null, 0.5);
+                }
+            }
 
             Functions.SpawnarPlayer(player);
         }
@@ -370,7 +381,7 @@ namespace VidaPolicial
         {
             player.SetSyncedMetaData("tempo", string.Empty);
             player.SetDateTime(DateTime.Now);
-            player.SetWeather(Global.Weather);
+            player.SetWeather(WeatherType.Clear);
             player.Spawn(new Position(0f, 0f, -5f));
 
             using var context = new DatabaseContext();
@@ -483,6 +494,7 @@ namespace VidaPolicial
             TimerSegundo?.Stop();
             TimerPrincipal?.Stop();
             BWVerificarPerseguicoes?.CancelAsync();
+            BWIniciarPerseguicoes?.CancelAsync();
 
             foreach (var x in Global.Usuarios)
                 Functions.SalvarUsuario(x);
@@ -496,7 +508,7 @@ namespace VidaPolicial
 
         private void TimerSegundo_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (!BWVerificarPerseguicoes.IsBusy)
+            if (!BWVerificarPerseguicoes.IsBusy && !BWIniciarPerseguicoes.IsBusy)
                 BWVerificarPerseguicoes.RunWorkerAsync();
         }
 
@@ -554,7 +566,7 @@ namespace VidaPolicial
             player.Emit("nametags:Config", true);
             player.Emit("Server:ConfirmarLogin");
             player.Emit("chat:activateTimeStamp", user.TimeStamp);
-            Functions.SpawnarPlayer(player, BWIniciarPerseguicoes.IsBusy);
+            Functions.SpawnarPlayer(player);
             Functions.EnviarMensagem(player, TipoMensagem.Nenhum, $"Que bom te ver por aqui! Digite {{{Global.CorAmarelo}}}/sobre{{#FFFFFF}} para entender como tudo funciona e {{{Global.CorAmarelo}}}/ajuda{{#FFFFFF}} para visualizar os comandos.");
 
             if (!BWIniciarPerseguicoes.IsBusy && Global.Perseguicoes.Count > 0)
@@ -690,7 +702,7 @@ namespace VidaPolicial
 
             p.Level++;
             foreach (var u in usuarios)
-                Functions.EnviarMensagem(u.Player, TipoMensagem.Sucesso, $"{p.Nome} algemou e capturou {fugitivo.Nome}.");
+                Functions.EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"{{{Global.CorAmarelo}}}{p.Nome}{{#FFFFFF}} algemou e capturou {{{Global.CorAmarelo}}}{fugitivo.Nome}{{#FFFFFF}}.");
             Functions.SpawnarPlayer(fugitivo.Player);
         }
 
@@ -720,7 +732,7 @@ namespace VidaPolicial
             if (atirou)
                 return;
 
-            Functions.EnviarMensagem(player, TipoMensagem.Erro, $"Você atirou/atacou e os disparos estão liberados.");
+            Functions.EnviarMensagem(player, TipoMensagem.Nenhum, $"Você {{{Global.CorAmarelo}}}atirou/atacou {{#FFFFFF}}e os disparos estão liberados.");
             player.SetSyncedMetaData("atirou", true);
             foreach (var u in Global.Usuarios.Where(x => x.Player.Dimension == player.Dimension && x.Policial))
             {

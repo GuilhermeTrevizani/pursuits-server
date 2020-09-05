@@ -1,4 +1,5 @@
 ﻿using AltV.Net;
+using AltV.Net.Enums;
 using System;
 using System.Linq;
 using System.Timers;
@@ -18,6 +19,8 @@ namespace VidaPolicial
         public int IDFugitivo { get; set; }
         public Timer TimerInicio { get; set; }
         public DateTime? DataUltimoAvisoPosicao { get; set; } = null;
+        public WeatherType Weather { get; set; }
+        public DateTime Horario { get; set; }
 
         public object Clone() => MemberwiseClone();
 
@@ -50,7 +53,7 @@ namespace VidaPolicial
                     u.Player.Emit("toggleGameControls", true, v);
                 }
 
-                Functions.EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"A perseguição iniciou. O bandido é: {{{Global.CorAmarelo}}}{fugitivo}");
+                Functions.EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"A perseguição iniciou. O bandido é: {{{Global.CorAmarelo}}}{fugitivo}{{#FFFFFF}}.");
             }
 
             TimerInicio?.Stop();

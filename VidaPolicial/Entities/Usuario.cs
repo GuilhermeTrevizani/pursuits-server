@@ -63,5 +63,8 @@ namespace VidaPolicial.Entities
 
         [NotMapped]
         public string ZoneName { get; set; }
+
+        [NotMapped]
+        public bool ArenaDM { get; set; }
     }
 }
