@@ -85,10 +85,11 @@ namespace VidaPolicial
             {
                 if (u.PosicaoSpec.HasValue)
                 {
-                    u.Player.Spawn(u.PosicaoSpec.Value);
+                    u.Player.Dimension = 0;
                     u.Player.SetSyncedMetaData("nametag", $"{u.Nome} [{u.ID}]");
-                    u.PosicaoSpec = null;
+                    u.Player.Spawn(u.PosicaoSpec.Value);
                     u.Player.Emit("UnspectatePlayer");
+                    u.PosicaoSpec = null;
                 }
 
                 u.Player.RemoveAllWeapons();

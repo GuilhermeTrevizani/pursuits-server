@@ -370,8 +370,9 @@ namespace VidaPolicial
                 return;
             }
 
-            player.Spawn(p.PosicaoSpec.Value);
+            player.Dimension = 0;
             player.SetSyncedMetaData("nametag", $"{p.Nome} [{p.ID}]");
+            player.Spawn(p.PosicaoSpec.Value);
             p.PosicaoSpec = null;
             player.Emit("UnspectatePlayer");
         }
