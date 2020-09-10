@@ -791,7 +791,8 @@ namespace VidaPolicial
 
             var p = Functions.ObterUsuario(player);
             if (model == "POLICE3" || model == "POLICESLICK" || model == "POLICEOLD" || model == "PSCOUT" || model == "POLRIOT"
-                || model == "BEACHP" || model == "POLMERIT2" || model == "POLICE42" || model == "POLSPEEDO" || model == "LSPDB")
+                || model == "BEACHP" || model == "POLMERIT2" || model == "POLICE42" || model == "POLSPEEDO" || model == "LSPDB"
+                || model == "PULICE" || model == "PULICE2" || model == "PULICE3" || model == "PULICE4")
             {
                 if (!p.DataTerminoVIP.HasValue)
                 {
