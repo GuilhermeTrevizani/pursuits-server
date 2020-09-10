@@ -41,19 +41,17 @@ namespace VidaPolicial
             Alt.OnClient<IPlayer, string, string>("SelecionarVeiculo", SelecionarVeiculo);
             Alt.OnClient<IPlayer, string, string>("SelecionarSkin", SelecionarSkin);
             Alt.OnClient<IPlayer, string, string>("AtualizarInformacoes", AtualizarInformacoes);
+            Alt.OnClient<IPlayer, string>("SelecionarPinturaArmas", SelecionarPinturaArmas);
 
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = CultureInfo.DefaultThreadCurrentUICulture =
                   CultureInfo.GetCultureInfo("pt-BR");
 
             var config = JsonConvert.DeserializeObject<Configuracao>(File.ReadAllText("settingsvidapolicial.json"));
-            Global.NomeServidor = "GTA V Pursuits";
             Global.MaxPlayers = config.MaxPlayers;
             Global.ConnectionString = $"Server={config.DBHost};Database={config.DBName};Uid={config.DBUser};Password={config.DBPassword}";
 
             using var context = new DatabaseContext();
             Global.Parametros = context.Parametros.FirstOrDefault();
-
-            Console.WriteLine($"{Global.NomeServidor} por Guilherme Trevizani (TR3V1Z4)");
 
             BWVerificarPerseguicoes = new BackgroundWorker()
             {
@@ -85,6 +83,14 @@ namespace VidaPolicial
 
             foreach (var u in users)
             {
+                if (u.PosicaoSpec.HasValue)
+                {
+                    u.Player.Spawn(u.PosicaoSpec.Value);
+                    u.Player.SetSyncedMetaData("nametag", $"{u.Nome} [{u.ID}]");
+                    u.PosicaoSpec = null;
+                    u.Player.Emit("UnspectatePlayer");
+                }
+
                 u.Player.RemoveAllWeapons();
                 u.Player.SetSyncedMetaData("podeatirar", false);
                 u.Player.Emit("setPlayerCanDoDriveBy", false);
@@ -104,14 +110,14 @@ namespace VidaPolicial
             var perseguicao = new Perseguicao()
             {
                 ID = Global.Perseguicoes.Select(x => x.ID).DefaultIfEmpty(0).Max() + 1,
-                Weather = (WeatherType)new List<uint> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13 }.OrderBy(x => Guid.NewGuid()).FirstOrDefault(), 
+                Weather = (WeatherType)new List<uint> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 13 }.OrderBy(x => Guid.NewGuid()).FirstOrDefault(),
                 Horario = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, random.Next(0, 23), random.Next(0, 59), 0),
             };
 
             foreach (var u in users)
             {
                 var index = users.IndexOf(u);
-                if (index % 10 == 0 && index != 0)
+                if (index % 9 == 0 && index != 0 && users.Count - (Global.Perseguicoes.Count + 1) * 9 >= 2)
                 {
                     Global.Perseguicoes.Add(perseguicao);
                     perseguicao.IniciarTimer();
@@ -134,7 +140,7 @@ namespace VidaPolicial
                 u.Policial = false;
                 var pedModel = (uint)u.Skin;
                 var pos = new Situacao.Posicao();
-                var veh = u.Helicoptero && !perseguicao.TemHelicoptero && perseguicao.IDFugitivo != 0 && users.Count - Global.Perseguicoes.Count * 10 >= 3 ? "POLMAV" : u.Veiculo;
+                var veh = u.Helicoptero && !perseguicao.TemHelicoptero && perseguicao.IDFugitivo != 0 && users.Count - Global.Perseguicoes.Count * 9 >= 3 ? "POLMAV" : u.Veiculo;
                 if (veh == "POLMAV")
                     perseguicao.TemHelicoptero = true;
 
@@ -167,17 +173,23 @@ namespace VidaPolicial
                 u.Player.Model = pedModel;
                 u.Player.Position = pos.Position;
                 u.Player.GiveWeapon(WeaponModel.Pistol, 2000, false);
+                u.Player.SetWeaponTintIndex(WeaponModel.Pistol, u.Pintura);
                 u.Player.GiveWeapon(WeaponModel.PumpShotgun, 2000, false);
+                u.Player.SetWeaponTintIndex(WeaponModel.PumpShotgun, u.Pintura);
                 u.Player.GiveWeapon(WeaponModel.SMG, 2000, false);
+                u.Player.SetWeaponTintIndex(WeaponModel.SMG, u.Pintura);
                 if (u.Policial)
                 {
+                    u.Player.AddWeaponComponent(WeaponModel.Pistol, 0x359B7AAE);
                     u.Player.GiveWeapon(WeaponModel.Flashlight, 1, false);
                     u.Player.GiveWeapon(WeaponModel.StunGun, 1, false);
                     u.Player.GiveWeapon(WeaponModel.CarbineRifle, 2000, false);
+                    u.Player.SetWeaponTintIndex(WeaponModel.CarbineRifle, u.Pintura);
                 }
                 else
                 {
                     u.Player.GiveWeapon(WeaponModel.AssaultRifle, 2000, false);
+                    u.Player.SetWeaponTintIndex(WeaponModel.AssaultRifle, u.Pintura);
                 }
                 u.Player.Health = u.Player.MaxHealth;
                 u.Player.Armor = 0;
@@ -196,7 +208,7 @@ namespace VidaPolicial
                 Functions.EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"A perseguição iniciará em {{{Global.CorAmarelo}}}10 {{#FFFFFF}}segundos.");
             }
 
-            if (users.Count % 10 != 0)
+            if (users.Count % 9 != 0)
             {
                 Global.Perseguicoes.Add(perseguicao);
                 perseguicao.IniciarTimer();
@@ -227,12 +239,12 @@ namespace VidaPolicial
                     var bandido = players.FirstOrDefault(y => !y.Policial);
                     if (bandido != null)
                     {
-                        bandido.Level += 5;
-                        msg += $"O bandido {{{Global.CorAmarelo}}}{bandido.Nome}{{#FFFFFF}} conseguiu escapar!";
+                        bandido.Level += bandido.DataTerminoVIP.HasValue ? 10 : 5;
+                        msg += $"O bandido {{{Global.CorAmarelo}}}{bandido.Nome}{{#FFFFFF}} conseguiu escapar.";
                     }
                     else
                     {
-                        msg += $"Os {{{Global.CorAmarelo}}}policiais{{#FFFFFF}} capturaram o bandido!";
+                        msg += $"Os {{{Global.CorAmarelo}}}policiais{{#FFFFFF}} capturaram o bandido.";
                     }
 
                     Global.Perseguicoes.Remove(p);
@@ -240,7 +252,7 @@ namespace VidaPolicial
                     foreach (var x in players)
                     {
                         if (bandido == null && x.Policial)
-                            x.Level++;
+                            x.Level += x.DataTerminoVIP.HasValue ? 2 : 1;
 
                         Functions.EnviarMensagem(x.Player, TipoMensagem.Nenhum, msg);
                         if (!x.Player.IsDead)
@@ -346,7 +358,7 @@ namespace VidaPolicial
                     }
                     else
                     {
-                        pKiller.Level++;
+                        pKiller.Level += p.DataTerminoVIP.HasValue ? 2 : 1;
 
                         if (!pKiller.Policial && p.Policial)
                             Atirou(playerKiller);
@@ -531,7 +543,7 @@ namespace VidaPolicial
         {
             if (string.IsNullOrWhiteSpace(usuario) || string.IsNullOrWhiteSpace(senha))
             {
-                player.Emit("Server:MostrarErro", "Verifique se todos os campos foram preenchidos corretamente!");
+                player.Emit("Server:MostrarErro", "Verifique se todos os campos foram preenchidos corretamente.");
                 return;
             }
 
@@ -540,7 +552,7 @@ namespace VidaPolicial
             var user = context.Usuarios.FirstOrDefault(x => x.Nome == usuario && x.Senha == senhaCriptografada);
             if (user == null)
             {
-                player.Emit("Server:MostrarErro", "Usuário ou senha inválidos!");
+                player.Emit("Server:MostrarErro", "Usuário ou senha inválidos.");
                 return;
             }
 
@@ -583,6 +595,8 @@ namespace VidaPolicial
             player.Emit("chat:activateTimeStamp", user.TimeStamp);
             Functions.SpawnarPlayer(player);
             Functions.EnviarMensagem(player, TipoMensagem.Nenhum, $"Que bom te ver por aqui! Digite {{{Global.CorAmarelo}}}/sobre{{#FFFFFF}} para entender como tudo funciona e {{{Global.CorAmarelo}}}/ajuda{{#FFFFFF}} para visualizar os comandos.");
+            if (user.DataTerminoVIP.HasValue)
+                Functions.EnviarMensagem(player, TipoMensagem.Nenhum, $"Seu VIP expira em {{{Global.CorAmarelo}}}{user.DataTerminoVIP}{{#FFFFFF}}.");
 
             if (!BWIniciarPerseguicoes.IsBusy && Global.Perseguicoes.Count > 0)
                 Functions.EnviarMensagem(player, TipoMensagem.Nenhum, "As perseguições estão em andamento! Confira o tempo restante no canto inferior direito da tela.");
@@ -592,31 +606,37 @@ namespace VidaPolicial
         {
             if (string.IsNullOrWhiteSpace(usuario) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(senha) || string.IsNullOrWhiteSpace(senha2))
             {
-                player.Emit("Server:MostrarErro", "Verifique se todos os campos foram preenchidos corretamente!");
+                player.Emit("Server:MostrarErro", "Verifique se todos os campos foram preenchidos corretamente.");
                 return;
             }
 
             if (usuario.Contains(" "))
             {
-                player.Emit("Server:MostrarErro", "Usuário não pode ter espaços!");
+                player.Emit("Server:MostrarErro", "Usuário não pode ter espaços.");
                 return;
             }
 
             if (usuario.Length > 25)
             {
-                player.Emit("Server:MostrarErro", "Usuário não pode ter mais que 25 caracteres!");
+                player.Emit("Server:MostrarErro", "Usuário não pode ter mais que 25 caracteres.");
                 return;
             }
 
             if (email.Length > 100)
             {
-                player.Emit("Server:MostrarErro", "Email não pode ter mais que 100 caracteres!");
+                player.Emit("Server:MostrarErro", "E-mail não pode ter mais que 100 caracteres.");
                 return;
             }
 
             if (senha != senha2)
             {
-                player.Emit("Server:MostrarErro", "Senhas não são iguais!");
+                player.Emit("Server:MostrarErro", "Senhas não são iguais.");
+                return;
+            }
+
+            if (!Functions.ValidarEmail(email))
+            {
+                player.Emit("Server:MostrarErro", "E-mail não está um formato válido.");
                 return;
             }
 
@@ -624,13 +644,13 @@ namespace VidaPolicial
             {
                 if (context.Usuarios.Any(x => x.Nome == usuario))
                 {
-                    player.Emit("Server:MostrarErro", $"Usuário {usuario} já existe!");
+                    player.Emit("Server:MostrarErro", $"Usuário {usuario} já existe.");
                     return;
                 }
 
                 if (context.Usuarios.Any(x => x.Email == email))
                 {
-                    player.Emit("Server:MostrarErro", $"Email {email} já está sendo utilizado!");
+                    player.Emit("Server:MostrarErro", $"Email {email} está sendo utilizado.");
                     return;
                 }
 
@@ -663,7 +683,15 @@ namespace VidaPolicial
                 return;
 
             var personagens = Global.Usuarios.OrderBy(x => x.ID == p.ID ? 0 : 1).ThenBy(x => x.ID)
-                .Select(x => new { x.ID, x.Nome, x.Level, Tipo = x.Staff.ToString(), x.Player.Ping, x.Cor }).ToList();
+                .Select(x => new
+                {
+                    x.ID,
+                    x.Nome,
+                    x.Level,
+                    Tipo = x.DataTerminoVIP.HasValue && x.Staff == TipoStaff.Jogador ? "VIP" : x.Staff.ToString(),
+                    x.Player.Ping,
+                    x.Cor
+                }).ToList();
             player.Emit("Server:ListarPlayers", Global.NomeServidor, JsonConvert.SerializeObject(personagens), Global.Usuarios.Count(x => x.Staff != TipoStaff.Jogador));
         }
 
@@ -681,12 +709,12 @@ namespace VidaPolicial
             {
                 if (p.VeiculoPerseguicao.LockState == VehicleLockState.Locked)
                 {
-                    Functions.EnviarMensagem(player, TipoMensagem.Sucesso, "Você destrancou o veículo!", notify: true);
+                    Functions.EnviarMensagem(player, TipoMensagem.Sucesso, "Você destrancou o veículo.", notify: true);
                     p.VeiculoPerseguicao.LockState = VehicleLockState.Unlocked;
                 }
                 else
                 {
-                    Functions.EnviarMensagem(player, TipoMensagem.Sucesso, "Você trancou o veículo!", notify: true);
+                    Functions.EnviarMensagem(player, TipoMensagem.Sucesso, "Você trancou o veículo.", notify: true);
                     p.VeiculoPerseguicao.LockState = VehicleLockState.Locked;
                 }
             }
@@ -715,7 +743,7 @@ namespace VidaPolicial
             if (player.Position.Distance(fugitivo.Player.Position) > 3)
                 return;
 
-            p.Level++;
+            p.Level += p.DataTerminoVIP.HasValue ? 2 : 1;
             foreach (var u in usuarios)
                 Functions.EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"{{{Global.CorAmarelo}}}{p.Nome}{{#FFFFFF}} algemou e capturou {{{Global.CorAmarelo}}}{fugitivo.Nome}{{#FFFFFF}}.");
             Functions.SpawnarPlayer(fugitivo.Player);
@@ -730,7 +758,7 @@ namespace VidaPolicial
             if (!p.Policial)
                 return;
 
-            Functions.EnviarMensagem(player, TipoMensagem.Sucesso, $"Você {(p.GPS ? "des" : string.Empty)}ativou o GPS!", notify: true);
+            Functions.EnviarMensagem(player, TipoMensagem.Sucesso, $"Você {(p.GPS ? "des" : string.Empty)}ativou o GPS.", notify: true);
             p.GPS = !p.GPS;
         }
 
@@ -759,16 +787,28 @@ namespace VidaPolicial
 
         private void SelecionarVeiculo(IPlayer player, string veiculo, string model)
         {
+            veiculo = veiculo.Replace("~q~[VIP] ~s~", string.Empty);
+
             var p = Functions.ObterUsuario(player);
+            if (model == "POLICE3" || model == "POLICESLICK" || model == "POLICEOLD" || model == "PSCOUT" || model == "POLRIOT"
+                || model == "BEACHP" || model == "POLMERIT2" || model == "POLICE42" || model == "POLSPEEDO" || model == "LSPDB")
+            {
+                if (!p.DataTerminoVIP.HasValue)
+                {
+                    Functions.EnviarMensagem(player, TipoMensagem.Erro, $"O veículo {veiculo} ({model}) é apenas para VIPs. Para saber como se tornar um, leia o canal #como-doar em nosso Discord.");
+                    return;
+                }
+            }
+
             p.Veiculo = model;
-            Functions.EnviarMensagem(player, TipoMensagem.Nenhum, $"Você selecionou o veículo {{{Global.CorAmarelo}}}{veiculo} ({model}){{#FFFFFF}} e será usado na próxima perseguição!");
+            Functions.EnviarMensagem(player, TipoMensagem.Nenhum, $"Você selecionou o veículo {{{Global.CorAmarelo}}}{veiculo} ({model}){{#FFFFFF}} e será usado na próxima perseguição.");
         }
 
         private void SelecionarSkin(IPlayer player, string skin, string model)
         {
             var p = Functions.ObterUsuario(player);
             p.Skin = (long)Enum.GetValues(typeof(PedModel)).Cast<PedModel>().FirstOrDefault(x => x.ToString().ToLower() == model.ToLower());
-            Functions.EnviarMensagem(player, TipoMensagem.Nenhum, $"Você selecionou a skin {{{Global.CorAmarelo}}}{skin} ({model}){{#FFFFFF}} e será usada na próxima perseguição!");
+            Functions.EnviarMensagem(player, TipoMensagem.Nenhum, $"Você selecionou a skin {{{Global.CorAmarelo}}}{skin} ({model}){{#FFFFFF}} e será usada na próxima perseguição.");
         }
 
         private void AtualizarInformacoes(IPlayer player, string areaName, string zoneName)
@@ -776,6 +816,14 @@ namespace VidaPolicial
             var p = Functions.ObterUsuario(player);
             p.AreaName = areaName;
             p.ZoneName = zoneName;
+        }
+
+        private void SelecionarPinturaArmas(IPlayer player, string descricao)
+        {
+            byte.TryParse(descricao.Split('-')[0].Trim(), out byte pintura);
+            var p = Functions.ObterUsuario(player);
+            p.Pintura = pintura;
+            Functions.EnviarMensagem(player, TipoMensagem.Nenhum, $"Você selecionou a pintura {{{Global.CorAmarelo}}}{descricao}{{#FFFFFF}} e será usada na próxima perseguição.");
         }
     }
 }

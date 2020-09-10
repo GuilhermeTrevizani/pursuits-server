@@ -1,4 +1,5 @@
 ﻿using AltV.Net;
+using AltV.Net.Data;
 using AltV.Net.Elements.Entities;
 using AltV.Net.Enums;
 using System;
@@ -48,110 +49,142 @@ namespace VidaPolicial
                     <td>Algema quando policial</td>
                 </tr>
                 <tr>
-                    <td>Player</td>
+                    <td>Jogador</td>
                     <td>/sobre</td>
                     <td>Visualiza sobre o servidor</td>
                 </tr>
                 <tr>
-                    <td>Player</td>
+                    <td>Jogador</td>
                     <td>/ajuda</td>
                     <td>Visualiza os comandos servidor</td>
                 </tr>
                 <tr>
-                    <td>Player</td>
+                    <td>Jogador</td>
                     <td>/skin</td>
                     <td>Seleciona sua skin quando policial</td>
                 </tr>
                 <tr>
-                    <td>Player</td>
+                    <td>Jogador</td>
                     <td>/veiculo</td>
                     <td>Selecionar seu veículo quando policial</td>
                 </tr>
                 <tr>
-                    <td>Player</td>
+                    <td>Jogador</td>
                     <td>/pm</td>
                     <td>Envia uma mensagem privada para outro jogador</td>
                 </tr>
                 <tr>
-                    <td>Player</td>
+                    <td>Jogador</td>
                     <td>/r</td>
                     <td>Envia uma mensagem no rádio quando policial</td>
                 </tr>
                 <tr>
-                    <td>Player</td>
+                    <td>Jogador</td>
                     <td>/desistir</td>
                     <td>Desiste de uma perseguição sendo policial ou bandido</td>
                 </tr>
                 <tr>
-                    <td>Player</td>
+                    <td>Jogador</td>
                     <td>/timestamp</td>
                     <td>Ativa/desativa timestamp do chat</td>
                 </tr>
                 <tr>
-                    <td>Player</td>
+                    <td>Jogador</td>
                     <td>/dm</td>
                     <td>Entra na arena DM</td>
                 </tr>
                 <tr>
-                    <td>Player</td>
+                    <td>Jogador</td>
                     <td>/helicoptero /heli</td>
                     <td>Ativa/desativa opção por helicóptero nas perseguições</td>
                 </tr>
                 <tr>
-                    <td>Player</td>
+                    <td>Jogador</td>
                     <td>/sair</td>
                     <td>Sai da arena DM</td>
+                </tr>
+                <tr>
+                    <td>Jogador</td>
+                    <td>/spec</td>
+                    <td>Observa um policial em uma perseguição</td>
+                </tr>
+                <tr>
+                    <td>Jogador</td>
+                    <td>/specoff</td>
+                    <td>Para de observar</td>
+                </tr>";
+
+            if (p.DataTerminoVIP.HasValue)
+                html += $@"<tr>
+                    <td>VIP</td>
+                    <td>/pintura</td>
+                    <td>Altera a pintura das armas nas perseguições</td>
                 </tr>";
 
             if ((int)p.Staff >= (int)TipoStaff.Ajudante)
                 html += $@"<tr>
-                    <td>Helper</td>
+                    <td>Ajudante</td>
                     <td>/kick</td>
-                    <td>Expulsa o player</td>
+                    <td>Expulsa o jogador</td>
                 </tr>";
 
             if ((int)p.Staff >= (int)TipoStaff.Administrador)
                 html += $@"<tr>
-                    <td>Administrator</td>
+                    <td>Administrador</td>
                     <td>/ban</td>
-                    <td>Bane o player</td>
+                    <td>Bane o jogador</td>
                 </tr>
                 <tr>
-                    <td>Administrator</td>
+                    <td>Administrador</td>
                     <td>/banoff</td>
-                    <td>Bane o player offline</td>
+                    <td>Bane o jogador offline</td>
                 </tr>
                 <tr>
-                    <td>Administrator</td>
+                    <td>Administrador</td>
                     <td>/unban</td>
-                    <td>Desbane o player</td>
+                    <td>Desbane o jogador</td>
                 </tr>
                 <tr>
-                    <td>Administrator</td>
+                    <td>Administrador</td>
                     <td>/save</td>
                     <td>Exibe a posição do jogador/veículo no console (F8)</td>
                 </tr>
                 <tr>
-                    <td>Administrator</td>
+                    <td>Administrador</td>
                     <td>/v</td>
                     <td>Cria um veículo</td>
                 </tr>
                 <tr>
-                    <td>Administrator</td>
+                    <td>Administrador</td>
                     <td>/gmx</td>
                     <td>Salva as informações do servidor</td>
                 </tr>
                 <tr>
-                    <td>Administrator</td>
+                    <td>Administrador</td>
                     <td>/rv</td>
                     <td>Remove um veículo</td>
+                </tr>
+                <tr>
+                    <td>Administrador</td>
+                    <td>/spec</td>
+                    <td>Observa um jogador</td>
                 </tr>";
 
             if ((int)p.Staff >= (int)TipoStaff.Diretor)
                 html += $@"<tr>
-                    <td>Manager</td>
+                    <td>Diretor</td>
                     <td>/staff</td>
-                    <td>Modifica o nível de staff de um player</td>
+                    <td>Modifica o nível de staff de um jogador</td>
+                </tr>
+                <tr>
+                    <td>Diretor</td>
+                    <td>/vip</td>
+                    <td>Atribui VIP para um jogador online</td>
+                </tr>
+                <tr>
+                    <td>Diretor</td>
+                    <td>/vipoff</td>
+                    <td>Atribui VIP para um jogador offline</td>
                 </tr>";
 
             html += $@"
@@ -208,7 +241,7 @@ namespace VidaPolicial
             var p = Functions.ObterUsuario(player);
             if (!p.Policial)
             {
-                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não é um policial!");
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não é um policial.");
                 return;
             }
 
@@ -221,7 +254,7 @@ namespace VidaPolicial
         {
             if (player.Dimension == 0)
             {
-                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não está em uma perseguição!");
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não está em uma perseguição.");
                 return;
             }
 
@@ -291,16 +324,82 @@ namespace VidaPolicial
             foreach (var u in Global.Usuarios.Where(x => x.Player.Dimension == 0))
                 Functions.EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"{{{Global.CorAmarelo}}}{p.Nome}{{#FFFFFF}} saiu da arena DM. {{{Global.CorAmarelo}}}(/sair)");
         }
+
+        [Command("spec", "/spec (ID ou nome)")]
+        public void CMD_spec(IPlayer player, string idNome)
+        {
+            var p = Functions.ObterUsuario(player);
+            if (player.Dimension != 0)
+            {
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você está em uma perseguição.");
+                return;
+            }
+
+            var target = Functions.ObterUsuarioPorIdNome(player, idNome, false);
+            if (target == null)
+                return;
+
+            if (!target.Policial)
+            {
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Jogador não é um policial.");
+                return;
+            }
+
+            if (target.PosicaoSpec.HasValue)
+            {
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Jogador está observando outro jogador.");
+                return;
+            }
+
+            if (!p.PosicaoSpec.HasValue)
+                p.PosicaoSpec = player.Position;
+
+            player.Dimension = target.Player.Dimension;
+            player.Spawn(new Position(target.Player.Position.X, target.Player.Position.Y, target.Player.Position.Z + 15));
+            player.SetSyncedMetaData("nametag", string.Empty);
+            player.Emit("SpectatePlayer", target.Player);
+        }
+
+        [Command("specoff")]
+        public void CMD_specoff(IPlayer player)
+        {
+            var p = Functions.ObterUsuario(player);
+            if (!p.PosicaoSpec.HasValue)
+            {
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não está observando um jogador.");
+                return;
+            }
+
+            player.Spawn(p.PosicaoSpec.Value);
+            player.SetSyncedMetaData("nametag", $"{p.Nome} [{p.ID}]");
+            p.PosicaoSpec = null;
+            player.Emit("UnspectatePlayer");
+        }
         #endregion
 
-        #region Helper
+        #region VIP
+        [Command("pintura")]
+        public void CMD_pintura(IPlayer player)
+        {
+            var p = Functions.ObterUsuario(player);
+            if (!p.DataTerminoVIP.HasValue)
+            {
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não é VIP.");
+                return;
+            }
+
+            player.Emit("AbrirSelecionarPinturaArmas");
+        }
+        #endregion
+
+        #region Ajudante
         [Command("kick", "/kick (ID ou nome) (motivo)", GreedyArg = true)]
         public void CMD_kick(IPlayer player, string idNome, string motivo)
         {
             var p = Functions.ObterUsuario(player);
             if ((int)p.Staff < (int)TipoStaff.Ajudante)
             {
-                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando!");
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando.");
                 return;
             }
 
@@ -314,16 +413,16 @@ namespace VidaPolicial
             Functions.SalvarUsuario(target);
             target.Player.Kick($"{p.Nome} kickou você. Motivo: {motivo}");
         }
-        #endregion
+        #endregion Ajudante
 
-        #region Administrator
+        #region Administrador
         [Command("ban", "/ban (ID ou nome) (dias) (motivo)", GreedyArg = true)]
         public void CMD_ban(IPlayer player, string idNome, int dias, string motivo)
         {
             var p = Functions.ObterUsuario(player);
             if ((int)p.Staff < (int)TipoStaff.Administrador)
             {
-                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando!");
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando.");
                 return;
             }
 
@@ -366,7 +465,7 @@ namespace VidaPolicial
             var p = Functions.ObterUsuario(player);
             if ((int)p.Staff < (int)TipoStaff.Administrador)
             {
-                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando!");
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando.");
                 return;
             }
 
@@ -374,7 +473,7 @@ namespace VidaPolicial
             var user = context.Usuarios.FirstOrDefault(x => x.Nome == usuario);
             if (user == null)
             {
-                Functions.EnviarMensagem(player, TipoMensagem.Erro, $"Usuário {usuario} não existe!");
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, $"Usuário {usuario} não existe.");
                 return;
             }
 
@@ -408,7 +507,7 @@ namespace VidaPolicial
             var p = Functions.ObterUsuario(player);
             if ((int)p.Staff < (int)TipoStaff.Administrador)
             {
-                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando!");
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando.");
                 return;
             }
 
@@ -417,14 +516,14 @@ namespace VidaPolicial
                 var user = context.Usuarios.FirstOrDefault(x => x.Nome == usuario);
                 if (user == null)
                 {
-                    Functions.EnviarMensagem(player, TipoMensagem.Erro, $"Usuário {usuario} não existe!");
+                    Functions.EnviarMensagem(player, TipoMensagem.Erro, $"Usuário {usuario} não existe.");
                     return;
                 }
 
                 var ban = context.Banimentos.FirstOrDefault(x => x.Usuario == user.Codigo);
                 if (ban == null)
                 {
-                    Functions.EnviarMensagem(player, TipoMensagem.Erro, $"Usuário {usuario} não está banido!");
+                    Functions.EnviarMensagem(player, TipoMensagem.Erro, $"Usuário {usuario} não está banido.");
                     return;
                 }
 
@@ -432,7 +531,7 @@ namespace VidaPolicial
                 context.SaveChanges();
             }
 
-            Functions.EnviarMensagem(player, TipoMensagem.Sucesso, $"Você desbaniu {usuario}!");
+            Functions.EnviarMensagem(player, TipoMensagem.Sucesso, $"Você desbaniu {usuario}.");
             Functions.GravarLog(TipoLog.Staff, $"/unban {usuario}", p, null);
         }
 
@@ -442,7 +541,7 @@ namespace VidaPolicial
             var p = Functions.ObterUsuario(player);
             if ((int)p.Staff < (int)TipoStaff.Administrador)
             {
-                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando!");
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando.");
                 return;
             }
 
@@ -463,19 +562,20 @@ namespace VidaPolicial
             var p = Functions.ObterUsuario(player);
             if ((int)p.Staff < (int)TipoStaff.Administrador)
             {
-                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando!");
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando.");
                 return;
             }
 
-            /*if (player.Dimension != 0)
+            if (player.Dimension != 0)
             {
-                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não pode criar um veículo em uma perseguição!");
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não pode criar um veículo em uma perseguição.");
                 return;
-            }*/
+            }
 
-            if (!Enum.GetValues(typeof(VehicleModel)).Cast<VehicleModel>().Any(x => x.ToString().ToLower() == modelo.ToLower()))
+            if (!Enum.GetValues(typeof(VehicleModel)).Cast<VehicleModel>().Any(x => x.ToString().ToLower() == modelo.ToLower())
+                && !Enum.GetValues(typeof(ModeloVeiculo)).Cast<ModeloVeiculo>().Any(x => x.ToString().ToLower() == modelo.ToLower()))
             {
-                Functions.EnviarMensagem(player, TipoMensagem.Erro, $"Modelo {modelo} não existe!");
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, $"Modelo {modelo} não existe.");
                 return;
             }
 
@@ -492,19 +592,19 @@ namespace VidaPolicial
             var p = Functions.ObterUsuario(player);
             if ((int)p.Staff < (int)TipoStaff.Administrador)
             {
-                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando!");
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando.");
                 return;
             }
 
             if (player.Dimension != 0)
             {
-                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não pode remover um veículo em uma perseguição!");
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não pode remover um veículo em uma perseguição.");
                 return;
             }
 
             if (!player.IsInVehicle)
             {
-                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não está em um veículo!");
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não está em um veículo.");
                 return;
             }
 
@@ -517,7 +617,7 @@ namespace VidaPolicial
             var p = Functions.ObterUsuario(player);
             if ((int)p.Staff < (int)TipoStaff.Diretor)
             {
-                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando!");
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando.");
                 return;
             }
 
@@ -527,22 +627,57 @@ namespace VidaPolicial
                 Functions.SalvarUsuario(pl);
             }
         }
-        #endregion
 
-        #region Manager
+        [Command("aspec", "/aspec (ID ou nome)")]
+        public void CMD_aspec(IPlayer player, string idNome)
+        {
+            var p = Functions.ObterUsuario(player);
+            if ((int)p.Staff < (int)TipoStaff.Administrador)
+            {
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando.");
+                return;
+            }
+
+            if (player.Dimension != 0)
+            {
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você está em uma perseguição.");
+                return;
+            }
+
+            var target = Functions.ObterUsuarioPorIdNome(player, idNome, false);
+            if (target == null)
+                return;
+
+            if (target.PosicaoSpec.HasValue)
+            {
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Jogador está observando outro jogador.");
+                return;
+            }
+
+            if (!p.PosicaoSpec.HasValue)
+                p.PosicaoSpec = player.Position;
+
+            player.Dimension = target.Player.Dimension;
+            player.Spawn(new Position(target.Player.Position.X, target.Player.Position.Y, target.Player.Position.Z + 15));
+            player.SetSyncedMetaData("nametag", string.Empty);
+            player.Emit("SpectatePlayer", target.Player);
+        }
+        #endregion Administrador
+
+        #region Diretor
         [Command("staff", "/staff (ID ou nome) (nível)")]
         public void CMD_staff(IPlayer player, string idNome, int staff)
         {
             var p = Functions.ObterUsuario(player);
             if ((int)p.Staff < (int)TipoStaff.Diretor)
             {
-                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando!");
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando.");
                 return;
             }
 
             if (!Enum.GetValues(typeof(TipoStaff)).Cast<TipoStaff>().Any(x => (int)x == staff))
             {
-                Functions.EnviarMensagem(player, TipoMensagem.Erro, $"Staff {staff} não existe!");
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, $"Staff {staff} não existe.");
                 return;
             }
 
@@ -556,6 +691,68 @@ namespace VidaPolicial
             Functions.EnviarMensagem(player, TipoMensagem.Sucesso, $"Você alterou o nível staff de {target.Nome} para {stf} [{staff}].");
             Functions.GravarLog(TipoLog.Staff, $"/staff {staff}", p, target);
         }
-        #endregion
+
+        [Command("vip", "/vip (ID ou nome)")]
+        public void CMD_vip(IPlayer player, string idNome)
+        {
+            var p = Functions.ObterUsuario(player);
+            if ((int)p.Staff < (int)TipoStaff.Diretor)
+            {
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando.");
+                return;
+            }
+
+            var target = Functions.ObterUsuarioPorIdNome(player, idNome);
+            if (target == null)
+                return;
+
+            if (target.DataTerminoVIP.HasValue)
+            {
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, $"Jogador já está com VIP.");
+                return;
+            }
+
+            target.DataTerminoVIP = DateTime.Now.AddMonths(1);
+            Functions.EnviarMensagem(target.Player, TipoMensagem.Sucesso, $"{p.Nome} te setou VIP até {target.DataTerminoVIP}.");
+            Functions.EnviarMensagem(player, TipoMensagem.Sucesso, $"Você setou VIP para {target.Nome} até {target.DataTerminoVIP}.");
+            Functions.GravarLog(TipoLog.Staff, $"/vip", p, target);
+        }
+
+        [Command("vipoff", "/vipoff (usuário)")]
+        public void CMD_vipoff(IPlayer player, string usuario)
+        {
+            var p = Functions.ObterUsuario(player);
+            if ((int)p.Staff < (int)TipoStaff.Diretor)
+            {
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você não possui autorização para usar esse comando.");
+                return;
+            }
+
+            var user = Global.Usuarios.FirstOrDefault(x => x.Nome.ToLower() == usuario.ToLower());
+            if (user != null)
+            {
+                Functions.EnviarMensagem(player, TipoMensagem.Erro, "Jogador está online. Use /vip.");
+                return;
+            }
+
+            using (var context = new DatabaseContext())
+            {
+                var target = context.Usuarios.FirstOrDefault(x => x.Nome == usuario);
+
+                if (target.DataTerminoVIP.HasValue)
+                {
+                    Functions.EnviarMensagem(player, TipoMensagem.Erro, $"Jogador já está com VIP.");
+                    return;
+                }
+
+                target.DataTerminoVIP = DateTime.Now.AddMonths(1);
+                Functions.EnviarMensagem(player, TipoMensagem.Sucesso, $"Você setou VIP para {target.Nome} até {target.DataTerminoVIP}.");
+                context.Usuarios.Update(target);
+                context.SaveChanges();
+
+                Functions.GravarLog(TipoLog.Staff, $"/vipoff {target.Nome}", p, null);
+            }
+        }
+        #endregion Diretor
     }
 }

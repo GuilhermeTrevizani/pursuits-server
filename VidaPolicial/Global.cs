@@ -10,7 +10,7 @@ namespace VidaPolicial
         public static string CorSucesso { get; set; } = "#6EB469";
         public static string CorAmarelo { get; set; } = "#FEBD0C";
         public static string CorErro { get; set; } = "#FF6A4D";
-        public static string NomeServidor { get; set; }
+        public static string NomeServidor { get; set; } = "GTA V Pursuits";
         public static int MaxPlayers { get; set; }
         public static string ConnectionString { get; set; }
         public static Parametro Parametros { get; set; }
@@ -125,13 +125,22 @@ namespace VidaPolicial
             PedModel.Franklin,
             PedModel.Trevor,
             PedModel.Michael,
+            PedModel.LamarDavis,
+            PedModel.Lazlow,
+            PedModel.JimmyDisanto,
         };
 
         public static List<VehicleModel> VeiculosFugitivo { get; set; } = new List<VehicleModel>()
         {
             VehicleModel.Schafter2,
-            VehicleModel.Dominator3,
-            VehicleModel.Premier,
+            VehicleModel.Washington,
+            VehicleModel.Ellie,
+            VehicleModel.Dominator,
+            VehicleModel.Oracle2,
+            VehicleModel.Felon2,
+            VehicleModel.Baller2,
+            VehicleModel.Everon,
+            VehicleModel.Fugitive,
         };
     }
 }

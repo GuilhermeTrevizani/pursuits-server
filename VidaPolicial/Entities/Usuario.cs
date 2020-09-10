@@ -1,7 +1,10 @@
-﻿using AltV.Net.Elements.Entities;
+﻿using AltV.Net;
+using AltV.Net.Data;
+using AltV.Net.Elements.Entities;
 using AltV.Net.Enums;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
 namespace VidaPolicial.Entities
 {
@@ -27,6 +30,8 @@ namespace VidaPolicial.Entities
         public long HardwareIdExHashUltimoAcesso { get; set; }
         public bool TimeStamp { get; set; } = true;
         public bool Helicoptero { get; set; } = false;
+        public DateTime? DataTerminoVIP { get; set; } = null;
+        public byte Pintura { get; set; } = 0;
 
         [NotMapped]
         public IPlayer Player { get; set; }
@@ -55,6 +60,8 @@ namespace VidaPolicial.Entities
                     cor = "#3498db";
                 else if (Staff == TipoStaff.Diretor)
                     cor = "#e81e61";
+                else if (DataTerminoVIP.HasValue)
+                    cor = "#f47fff";
                 return cor;
             }
         }
@@ -67,5 +74,8 @@ namespace VidaPolicial.Entities
 
         [NotMapped]
         public bool ArenaDM { get; set; }
+
+        [NotMapped]
+        public Position? PosicaoSpec { get; set; }
     }
 }

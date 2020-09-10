@@ -4,6 +4,7 @@ using AltV.Net.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -32,20 +33,30 @@ namespace VidaPolicial
 
             using (var context = new DatabaseContext())
             {
-                if (ban.Expiracao != null)
+                if (ban.Expiracao.HasValue && DateTime.Now > ban.Expiracao)
                 {
-                    if (DateTime.Now > ban.Expiracao)
-                    {
-                        context.Banimentos.Remove(ban);
-                        context.SaveChanges();
-                        return true;
-                    }
+                    context.Banimentos.Remove(ban);
+                    context.SaveChanges();
+                    return true;
                 }
 
-                var staff = context.Usuarios.FirstOrDefault(x => x.Codigo == ban.UsuarioStaff)?.Nome;
-                var strBan = ban.Expiracao == null ? " permanentemente." : $". Seu banimento expira em: {ban.Expiracao?.ToString()}";
 
-                player.Emit("Server:BaseHTML", $"Você está banido{strBan}<br/>Data: <strong>{ban.Data}</strong><br/>Motivo: <strong>{ban.Motivo}</strong><br/>Staffer: <strong>{staff}</strong>");
+                var usuario = context.Usuarios.FirstOrDefault(x => x.Codigo == ban.Usuario)?.Nome;
+                var staff = context.Usuarios.FirstOrDefault(x => x.Codigo == ban.UsuarioStaff)?.Nome;
+                var strBan = ban.Expiracao == null ? " permanentemente." : $". Seu banimento expira em: <strong>{ban.Expiracao}</strong>.";
+
+                var html = $@"<div class='box-header with-border'>
+                <h3>{Global.NomeServidor} • Banimento</h3> 
+                </div>
+                <div class='box-body' style='max-height:50vh;overflow-y:auto;overflow-x:hidden;'>
+                Você está banido{strBan}<br/>
+                Usuário: <strong>{usuario}</strong><br/>
+                Data: <strong>{ban.Data}</strong><br/>
+                Motivo: <strong>{ban.Motivo}</strong><br/>
+                Staffer: <strong>{staff}</strong>
+                </div>";
+
+                player.Emit("Server:BaseHTML", html);
             }
 
             return false;
@@ -97,7 +108,7 @@ namespace VidaPolicial
             player.Emit("chat:sendMessage", mensagem, cor, tipoMensagem == TipoMensagem.Nenhum ? null : gradient, icone);
         }
 
-        public static Usuario ObterUsuario(IPlayer player) => Global.Usuarios.FirstOrDefault(x => x.Player.HardwareIdHash == player.HardwareIdHash);
+        public static Usuario ObterUsuario(IPlayer player) => Global.Usuarios.FirstOrDefault(x => x?.Player?.HardwareIdHash == player.HardwareIdHash);
 
         public static void SalvarUsuario(Usuario u)
         {
@@ -137,7 +148,7 @@ namespace VidaPolicial
             {
                 if (!isPodeProprioPlayer && player == p.Player)
                 {
-                    EnviarMensagem(player, TipoMensagem.Erro, $"O jogador não pode ser você!");
+                    EnviarMensagem(player, TipoMensagem.Erro, $"O jogador não pode ser você.");
                     return null;
                 }
 
@@ -149,7 +160,7 @@ namespace VidaPolicial
             {
                 if (!isPodeProprioPlayer && player == ps.FirstOrDefault().Player)
                 {
-                    EnviarMensagem(player, TipoMensagem.Erro, $"O jogador não pode ser você!");
+                    EnviarMensagem(player, TipoMensagem.Erro, $"O jogador não pode ser você.");
                     return null;
                 }
 
@@ -231,19 +242,39 @@ namespace VidaPolicial
 
             var pos = posicoes[new Random().Next(0, 3)];
 
+            var p = ObterUsuario(player);
+
             player.Spawn(pos.Position);
             player.Rotation = pos.Rotation;
             player.GiveWeapon(WeaponModel.PumpShotgun, 1000, false);
+            player.SetWeaponTintIndex(WeaponModel.PumpShotgun, p.Pintura);
             player.GiveWeapon(WeaponModel.MicroSMG, 1000, false);
+            player.SetWeaponTintIndex(WeaponModel.MicroSMG, p.Pintura);
             player.GiveWeapon(WeaponModel.Pistol, 1000, true);
+            player.SetWeaponTintIndex(WeaponModel.Pistol, p.Pintura);
 
-            var p = ObterUsuario(player);
             p.ArenaDM = true;
 
             if (exibirAviso)
             {
                 foreach (var u in Global.Usuarios.Where(x => x.Player.Dimension == 0))
                     EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"{{{Global.CorAmarelo}}}{p.Nome}{{#FFFFFF}} foi para a arena DM. {{{Global.CorAmarelo}}}(/dm)");
+            }
+        }
+
+        public static bool ValidarEmail(string email)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(email))
+                    return false;
+
+                var m = new MailAddress(email);
+                return true;
+            }
+            catch (FormatException)
+            {
+                return false;
             }
         }
     }

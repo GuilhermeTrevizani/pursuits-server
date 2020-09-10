@@ -32,4 +32,21 @@
         SandyShores = 2,
         PaletoBay = 3,
     }
+
+    public enum ModeloVeiculo
+    {
+        PoliceSlick,
+        PoliceOld,
+        PScout,
+        BeachP,
+        Polmerit2,
+        Police42,
+        PolSpeedo,
+        PolRiot,
+        LSPDB,
+        Pulice,
+        Pulice2,
+        Pulice3,
+        Pulice4,
+    }
 }
