@@ -34,7 +34,6 @@ namespace VidaPolicial
             Alt.OnClient<IPlayer, string, string, string, string>("RegistrarUsuario", RegistrarUsuario);
             Alt.OnClient<IPlayer>("ListarPlayers", ListarPlayers);
             Alt.OnClient<IPlayer>("TrancarDestrancarVeiculo", TrancarDestrancarVeiculo);
-            Alt.OnClient<IPlayer, bool>("PlayerDigitando", PlayerDigitando);
             Alt.OnClient<IPlayer>("Algemar", Algemar);
             Alt.OnClient<IPlayer>("AtivarDesativarGPS", AtivarDesativarGPS);
             Alt.OnClient<IPlayer>("Atirou", Atirou);
@@ -171,8 +170,8 @@ namespace VidaPolicial
                     }
                 }
 
+                u.Player.Spawn(pos.Position);
                 u.Player.Model = pedModel;
-                u.Player.Position = pos.Position;
                 u.Player.GiveWeapon(WeaponModel.Pistol, 2000, false);
                 u.Player.SetWeaponTintIndex(WeaponModel.Pistol, u.Pintura);
                 u.Player.GiveWeapon(WeaponModel.PumpShotgun, 2000, false);
@@ -381,7 +380,7 @@ namespace VidaPolicial
                     playerKiller.Health = playerKiller.MaxHealth;
                     playerKiller.Armor = playerKiller.MaxArmor;
                     var pKiller = Functions.ObterUsuario(playerKiller);
-                    foreach (var u in Global.Usuarios.Where(x => p.ArenaDM))
+                    foreach (var u in Global.Usuarios.Where(x => x.ArenaDM))
                         u.Player.Emit("displayAdvancedNotification", $"~r~{pKiller.Nome} ~w~matou ~r~{p.Nome}", "Arena DM", string.Empty, "CHAR_LESTER_DEATHWISH", 0, null, 0.5);
                 }
             }
@@ -410,7 +409,6 @@ namespace VidaPolicial
             player.SetSyncedMetaData("tempo", string.Empty);
             player.SetDateTime(DateTime.Now);
             player.SetWeather(WeatherType.Clear);
-            player.Spawn(new Position(0f, 0f, -5f));
 
             using var context = new DatabaseContext();
 
@@ -720,8 +718,6 @@ namespace VidaPolicial
                 }
             }
         }
-
-        private void PlayerDigitando(IPlayer player, bool state) => player.SetSyncedMetaData("chatting", state);
 
         private void Algemar(IPlayer player)
         {
