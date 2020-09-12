@@ -409,6 +409,7 @@ namespace VidaPolicial
             player.SetSyncedMetaData("tempo", string.Empty);
             player.SetDateTime(DateTime.Now);
             player.SetWeather(WeatherType.Clear);
+            player.Spawn(new Position(0f, 0f, 0f));
 
             using var context = new DatabaseContext();
 
