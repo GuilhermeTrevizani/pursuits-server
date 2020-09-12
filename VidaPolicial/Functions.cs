@@ -212,7 +212,7 @@ namespace VidaPolicial
 
             player.SetDateTime(DateTime.Now);
             player.SetWeather(WeatherType.Clear);
-            player.Model = (uint)PedModel.Agent14;
+            player.Model = (uint)PedModel.FreemodeMale01;
             player.Health = player.MaxHealth;
             player.Armor = player.MaxArmor;
             player.Dimension = 0;
