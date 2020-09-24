@@ -197,17 +197,14 @@ namespace VidaPolicial
         public static void SpawnarPlayer(IPlayer player)
         {
             var x = ObterUsuario(player);
-            if (x.VeiculoPerseguicao != null)
-            {
-                x.GPS = false;
-                x.Policial = false;
-                x.VeiculoPerseguicao = null;
+            x.GPS = false;
+            x.Policial = false;
+            x.VeiculoPerseguicao = null;
 
-                foreach (var u in Global.Usuarios)
-                {
-                    u.Player.Emit("blip:remove", x.ID);
-                    player.Emit("blip:remove", u.ID);
-                }
+            foreach (var u in Global.Usuarios)
+            {
+                u.Player.Emit("blip:remove", x.ID);
+                player.Emit("blip:remove", u.ID);
             }
 
             player.SetDateTime(DateTime.Now);

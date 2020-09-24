@@ -227,7 +227,7 @@ namespace VidaPolicial
             {
                 var p = Global.Perseguicoes[i];
 
-                var players = Global.Usuarios.Where(x => x.Player.Dimension == p.ID).ToList();
+                var players = Global.Usuarios.Where(x => x.Player.Dimension == p.ID && x.VeiculoPerseguicao != null).ToList();
                 var minutosPerseguicao = (DateTime.Now - (p.Inicio ?? DateTime.Now)).Minutes;
                 if (players.GroupBy(x => x.Policial).Count() <= 1 || minutosPerseguicao >= 7)
                 {
@@ -559,6 +559,12 @@ namespace VidaPolicial
             if (!Functions.VerificarBanimento(player, context.Banimentos.FirstOrDefault(x => x.Usuario == user.Codigo)))
                 return;
 
+            if (Global.Usuarios.Any(x => x?.Nome == usuario))
+            {
+                player.Emit("Server:MostrarErro", "Usuário já está logado.");
+                return;
+            }
+
             user.Player = player;
             user.DataUltimoAcesso = DateTime.Now;
             user.IPUltimoAcesso = Functions.ObterIP(player);
@@ -586,7 +592,7 @@ namespace VidaPolicial
                 Functions.EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"{user.Nome} {{{Global.CorSucesso}}}entrou{{#FFFFFF}} no servidor.");
 
                 if (temRecorde)
-                    Functions.EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"O novo recorde de jogadores online é: {{{Global.CorSucesso}}}{Global.Parametros.RecordeOnline}");
+                    Functions.EnviarMensagem(u.Player, TipoMensagem.Nenhum, $"O novo recorde de jogadores online é: {{{Global.CorSucesso}}}{Global.Parametros.RecordeOnline}{{#FFFFFF}}.");
             }
 
             player.SetSyncedMetaData("nametag", $"{user.Nome} [{user.ID}]");
@@ -701,7 +707,7 @@ namespace VidaPolicial
                 return;
 
             var p = Functions.ObterUsuario(player);
-            if (!p.Policial)
+            if (!p.Policial || p.VeiculoPerseguicao == null)
                 return;
 
             if ((player.IsInVehicle && player.Vehicle == p.VeiculoPerseguicao)
@@ -726,7 +732,7 @@ namespace VidaPolicial
                 return;
 
             var p = Functions.ObterUsuario(player);
-            if (!p.Policial)
+            if (!p.Policial || p.VeiculoPerseguicao == null)
                 return;
 
             var usuarios = Global.Usuarios.Where(x => x.Player.Dimension == player.Dimension).ToList();
@@ -753,7 +759,7 @@ namespace VidaPolicial
                 return;
 
             var p = Functions.ObterUsuario(player);
-            if (!p.Policial)
+            if (!p.Policial || p.VeiculoPerseguicao == null)
                 return;
 
             Functions.EnviarMensagem(player, TipoMensagem.Sucesso, $"Você {(p.GPS ? "des" : string.Empty)}ativou o GPS.", notify: true);
@@ -766,7 +772,7 @@ namespace VidaPolicial
                 return;
 
             var p = Functions.ObterUsuario(player);
-            if (p.Policial)
+            if (p.Policial || p.VeiculoPerseguicao == null)
                 return;
 
             player.GetSyncedMetaData("atirou", out bool atirou);

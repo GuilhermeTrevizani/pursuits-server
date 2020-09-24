@@ -22,7 +22,7 @@ namespace VidaPolicial.Entities
         public string IPUltimoAcesso { get; set; } = string.Empty;
         public TipoStaff Staff { get; set; } = 0;
         public int Level { get; set; } = 1;
-        public string Veiculo { get; set; } = VehicleModel.Police3.ToString();
+        public string Veiculo { get; set; } = VehicleModel.Police2.ToString();
         public long Skin { get; set; } = (long)PedModel.Cop01SMY;
         public long HardwareIdHashRegistro { get; set; }
         public long HardwareIdExHashRegistro { get; set; }

@@ -329,7 +329,7 @@ namespace VidaPolicial
         public void CMD_spec(IPlayer player, string idNome)
         {
             var p = Functions.ObterUsuario(player);
-            if (player.Dimension != 0)
+            if (player.Dimension != 0 && !p.PosicaoSpec.HasValue)
             {
                 Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você está em uma perseguição.");
                 return;
@@ -639,7 +639,7 @@ namespace VidaPolicial
                 return;
             }
 
-            if (player.Dimension != 0)
+            if (player.Dimension != 0 && !p.PosicaoSpec.HasValue)
             {
                 Functions.EnviarMensagem(player, TipoMensagem.Erro, "Você está em uma perseguição.");
                 return;
