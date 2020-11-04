@@ -414,15 +414,15 @@ namespace VidaPolicial
             using var context = new DatabaseContext();
 
             if (!Functions.VerificarBanimento(player,
-                context.Banimentos.FirstOrDefault(x => (x.SocialClub == (long)player.SocialClubId && x.SocialClub != 0)
-                || x.HardwareIdHash == (long)player.HardwareIdHash
-                || x.HardwareIdExHash == (long)player.HardwareIdExHash)))
+                context.Banimentos.FirstOrDefault(x => x.SocialClub == (long)player.SocialClubId
+                && x.HardwareIdHash == (long)player.HardwareIdHash
+                && x.HardwareIdExHash == (long)player.HardwareIdExHash)))
                 return;
 
             player.Emit("Server:Login",
-                context.Usuarios.FirstOrDefault(x => (x.SocialClubRegistro == (long)player.SocialClubId && x.SocialClubRegistro != 0)
-                || x.HardwareIdHashRegistro == (long)player.HardwareIdHash
-                || x.HardwareIdExHashRegistro == (long)player.HardwareIdExHash)?.Nome ?? string.Empty);
+                context.Usuarios.FirstOrDefault(x => x.SocialClubRegistro == (long)player.SocialClubId
+                && x.HardwareIdHashRegistro == (long)player.HardwareIdHash
+                && x.HardwareIdExHashRegistro == (long)player.HardwareIdExHash)?.Nome ?? string.Empty);
         }
 
         private void OnPlayerChat(IPlayer player, string mensagem)
