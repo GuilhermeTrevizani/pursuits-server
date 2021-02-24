@@ -1,0 +1,29 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <script src="../resources/jquery-3.1.0.min.js"></script>
+	<link rel="stylesheet" href="../resources/bootstrap.min.css" />
+    <link rel="stylesheet" href="players.css" />
+</head>
+<body>
+	<div id="title" class="playerListTitle"></div>
+	<div class="playerList">
+		<table class="table">
+			<thead>
+				<tr>
+					<th scope="col">ID</th>
+					<th scope="col" style="white-space: nowrap;">Nome</th>
+					<th scope="col">Nível</th>
+					<th scope="col" style="white-space: nowrap;">Tipo</th>
+					<th scope="col">Ping</th>
+				</tr>
+			</thead>
+			<tbody class="playerBody" id="onlineplayers">
+			</tbody>
+		</table>
+	</div>
+	<div id="bottom" class="playerListBottom">Equipe Administrativa:</div>
+    <script src="index.js"></script>
+</body>
+</html>

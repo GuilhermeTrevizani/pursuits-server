@@ -45,7 +45,7 @@ namespace VidaPolicial
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = CultureInfo.DefaultThreadCurrentUICulture =
                   CultureInfo.GetCultureInfo("pt-BR");
 
-            var config = JsonConvert.DeserializeObject<Configuracao>(File.ReadAllText("settingsvidapolicial.json"));
+            var config = JsonConvert.DeserializeObject<Configuracao>(File.ReadAllText("settings.json"));
             Global.MaxPlayers = config.MaxPlayers;
             Global.ConnectionString = $"Server={config.DBHost};Database={config.DBName};Uid={config.DBUser};Password={config.DBPassword}";
 
