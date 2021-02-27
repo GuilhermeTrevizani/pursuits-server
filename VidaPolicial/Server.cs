@@ -602,7 +602,13 @@ namespace VidaPolicial
             Functions.SpawnarPlayer(player);
             Functions.EnviarMensagem(player, TipoMensagem.Nenhum, $"Que bom te ver por aqui! Digite {{{Global.CorAmarelo}}}/sobre{{#FFFFFF}} para entender como tudo funciona e {{{Global.CorAmarelo}}}/ajuda{{#FFFFFF}} para visualizar os comandos.");
             if (user.DataTerminoVIP.HasValue)
-                Functions.EnviarMensagem(player, TipoMensagem.Nenhum, $"Seu VIP expira em {{{Global.CorAmarelo}}}{user.DataTerminoVIP}{{#FFFFFF}}.");
+            {
+                if (user.DataTerminoVIP < DateTime.Now)
+                    user.DataTerminoVIP = null;
+
+                if (user.DataTerminoVIP.HasValue)
+                    Functions.EnviarMensagem(player, TipoMensagem.Nenhum, $"Seu VIP expira em {{{Global.CorAmarelo}}}{user.DataTerminoVIP}{{#FFFFFF}}.");
+            }
 
             if (!BWIniciarPerseguicoes.IsBusy && Global.Perseguicoes.Count > 0)
                 Functions.EnviarMensagem(player, TipoMensagem.Nenhum, "As perseguições estão em andamento! Confira o tempo restante no canto inferior direito da tela.");
@@ -795,8 +801,7 @@ namespace VidaPolicial
 
             var p = Functions.ObterUsuario(player);
             if (model == "POLICE3" || model == "POLICESLICK" || model == "POLICEOLD" || model == "PSCOUT" || model == "POLRIOT"
-                || model == "BEACHP" || model == "POLMERIT2" || model == "POLICE42" || model == "POLSPEEDO" || model == "LSPDB"
-                || model == "PULICE" || model == "PULICE2" || model == "PULICE3" || model == "PULICE4")
+                || model == "BEACHP" || model == "POLMERIT2" || model == "POLICE42" || model == "POLSPEEDO" || model == "LSPDB")
             {
                 if (!p.DataTerminoVIP.HasValue)
                 {

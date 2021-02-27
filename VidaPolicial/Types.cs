@@ -44,9 +44,5 @@
         PolSpeedo,
         PolRiot,
         LSPDB,
-        Pulice,
-        Pulice2,
-        Pulice3,
-        Pulice4,
     }
 }

@@ -279,10 +279,6 @@ alt.onServer('AbrirSelecionarVeiculo', () => {
     ui.AddItem(new NativeUI.UIMenuItem('~q~[VIP] ~s~VAPID Police Speedo', 'POLSPEEDO'));
     ui.AddItem(new NativeUI.UIMenuItem('~q~[VIP] ~s~Police RIOT', 'POLRIOT'));
     ui.AddItem(new NativeUI.UIMenuItem('~q~[VIP] ~s~LSPD Motorcycle', 'LSPDB'));
-    ui.AddItem(new NativeUI.UIMenuItem('~q~[VIP] ~s~VAPID Police Cruiser v2', 'PULICE'));
-    ui.AddItem(new NativeUI.UIMenuItem('~q~[VIP] ~s~Bravado Police Interceptor v2', 'PULICE2'));
-    ui.AddItem(new NativeUI.UIMenuItem('~q~[VIP] ~s~VAPID Police Interceptor v2', 'PULICE3'));
-    ui.AddItem(new NativeUI.UIMenuItem('~q~[VIP] ~s~Stanier Unmarked Police Cruiser', 'PULICE4'));
     
     ui.ItemSelect.on(item => {
         if (item instanceof NativeUI.UIMenuItem) {
