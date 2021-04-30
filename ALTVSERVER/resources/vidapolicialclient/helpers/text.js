@@ -1,6 +1,6 @@
 import * as native from 'natives';
 
-export function drawText2d(
+export async function drawText2d(
     msg,
     x,
     y,

@@ -47,7 +47,7 @@ namespace VidaPolicial
 
             var config = JsonConvert.DeserializeObject<Configuracao>(File.ReadAllText("settings.json"));
             Global.MaxPlayers = config.MaxPlayers;
-            Global.ConnectionString = $"Server={config.DBHost};Database={config.DBName};Uid={config.DBUser};Password={config.DBPassword}";
+            Global.ConnectionString = $"Server={config.DBHost};Database={config.DBName};User ID={config.DBUser};Password={config.DBPassword}";
 
             using var context = new DatabaseContext();
             Global.Parametros = context.Parametros.FirstOrDefault();

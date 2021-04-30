@@ -7,12 +7,6 @@ let interval;
 
 alt.onServer('nametags:Config', handleConfig);
 
-/**
- * @param  {Boolean} _showNametags
- * @param  {Boolean} _hideNamesInVehicles
- * @param  {Boolean} _showBarsOnAim
- * @param  {Number} _maxDrawDistance
- */
 function handleConfig(_showNametags) {
     showNametags = _showNametags;
 
@@ -27,7 +21,7 @@ function handleConfig(_showNametags) {
     interval = alt.setInterval(drawNametags, 0);
 }
 
-function drawNametags() {
+async function drawNametags() {
     for (let i = 0, n = alt.Player.all.length; i < n; i++) {
         let player = alt.Player.all[i];
         if (!player.valid)
@@ -76,7 +70,7 @@ function drawNametags() {
         native.addTextComponentSubstringPlayerName(isChatting ? `${name}~r~*` : `${name}`);
         native.endTextCommandDisplayText(0, 0);
 
-        /*const lineHeight = native.getTextScaleHeight(fontSize, 4);
+        const lineHeight = native.getTextScaleHeight(fontSize, 4);
         
         drawBarBackground(100, lineHeight, scale, 0.75, 139, 0, 0, 255);
         drawBar(native.getEntityHealth(player.scriptID) - 100, lineHeight, scale, 0.75, 255, 0, 0, 255); //  - 100
@@ -84,7 +78,7 @@ function drawNametags() {
         if (native.getPedArmour(player.scriptID) > 0) {
             drawBarBackground(100, lineHeight, scale, 0.25, 140, 140, 140, 255);
             drawBar(native.getPedArmour(player.scriptID), lineHeight, scale, 0.25, 255, 255, 255, 255); 
-        }*/
+        }
 
         native.clearDrawOrigin();
     }
@@ -95,7 +89,7 @@ function drawNametags() {
  * @param  {alt.Vector3} vector2
  */
 function distance2d(vector1, vector2) {
-    return Math.sqrt(Math.pow(vector1.x - vector2.x, 2) + Math.pow(vector1.y - vector2.y, 2));
+    return Math.sqrt(Math.pow(vector1.x - vector2.x, 2) + Math.pow(vector1.y - vector2.y, 2) + Math.pow(vector1.z - vector2.z, 2));
 }
 
 function drawBar(value, lineHeight, scale, position, r, g, b, a) {

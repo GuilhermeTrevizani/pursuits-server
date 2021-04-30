@@ -55,7 +55,7 @@ alt.setInterval(() => {
 }, 800);
 
 alt.everyTick(() => {
-    drawText2d('GTA V Pursuits ~y~by TR3V1Z4', 0.8, 0.92, 0.5, 4, 255, 255, 255, 180, true, true, 2);
+    drawText2d('GTA V Pursuits ~y~by Trevizani', 0.8, 0.92, 0.5, 4, 255, 255, 255, 180, true, true, 2);
 
     if (!player.hasSyncedMeta('nametag'))
         return;
